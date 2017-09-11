@@ -1,6 +1,10 @@
 # ACNE
 Absolute Copy Number Estimation using low-coverage whole genome sequencing data
 
+This readme only contains an executive summary of ACNE. You can try reading the paper for more background on the "why", this readme has more info on the "what" and "how" of the code.
+
+ACNE is a an absolute copy number estimator that scales copy number data to fit with integer copy numbers. For this it uses segmented data from the QDNAseq package, which in turn uses a number of dependencies. Note: make sure QDNAseq fetches the bin annotations from the same genome build as the one used for aligning the sequencing data! On with ACNE! In brief: ACNE will run QDNAseq or use its output rds-file of segmented data. It will subsequently run through all samples in the object(s), for which it will create individual subdirectories. For each sample, it will calculate how well the segments fit (the relative error) to integer copy numbers for each percentage of "tumor cells" (cells with divergent segments). Note that it does not estimate for a lower percentage than 5. ACNE will output a graph with relative errors (all errors relative to the largest error). Said graph can be used to quickly identify the most likely fit. ACNE selects all "minima" and saves the corresponding copy number plots. The "best fit" (lowest error) is not by definition the most likely fit! ACNE will run models for a general tumor ploidy of 2N, but you can expand this to include any ploidy of your choosing. The program needs to make one assumption: the median bin segment value corresponds with the tumor's general ploidy. If none of the fits are to your liking, there are several functions to help you out. Most of it is covered in the walkthrough.
+
 ##### ACNE has arrived! ###### 
 There are currently eight functions: acne, ploidyplotloop, ObjectsampleToTemplate, singlemodel, singleplot, getadjustedsegments, linkmutationdata, postanalysisloop, analyzegenomiclocations. I have also added the "multiplot" function for making summary sheets.
 
