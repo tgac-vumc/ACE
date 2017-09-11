@@ -1,11 +1,24 @@
 # the below piece of code was created to make complete summary pictures of samples
 # they include the error plots of the samples with and without penalty
 # the code is easily adjusted to test and plot other variables (different ploidy, different error models, etc)
-# the variable models refers to a dataframe of a completed models.txt file
+# the variable "models" refers to a dataframe of a completed models.txt file
+# this is not a polished piece of code!!!
+# it will create a directory all_plots in your current working directory
+# it expects a QDNAseq-object called object in your workspace
+# you also need to source ACNE.R
+
+# source("ACNE.R")
+# library(QDNAseq)
+# object <- readRDS("myrdsfile.rds")
+# models <- read.table("models.txt", header = TRUE, comment.char = "", sep = "\t")
+
+library(Biobase)
+library(ggplot2)
+pd <- pData(object)
 
 for (a in 1:length(pd$name)) {
-  error0 <- singlemodel(matias96,QDNAseqobjectsample = a,penalty = 0)
-  error0.5 <- singlemodel(matias96,QDNAseqobjectsample = a,penalty = 0.5)
+  error0 <- singlemodel(object,QDNAseqobjectsample = a,penalty = 0)
+  error0.5 <- singlemodel(object,QDNAseqobjectsample = a,penalty = 0.5)
   min0 <- error0$minima[which(error0$rerror==min(error0$rerror))]
   last0 <- tail(error0$minima,1)
   min0.5 <- error0.5$minima[which(error0.5$rerror==min(error0.5$rerror))]
@@ -17,9 +30,9 @@ for (a in 1:length(pd$name)) {
   st <- models$standard[which(models$sample==pd$name[a])]
   pl <- models$ploidy[which(models$sample==pd$name[a])]
   cell <- models$likely_fit[which(models$sample==pd$name[a])]
-  plots[[3]] <- singleplot(matias96,QDNAseqobjectsample = a,standard = st, ploidy = pl, cellularity = cell, title = paste0(pd$name[a], " - chosen model"))
+  plots[[3]] <- singleplot(object,QDNAseqobjectsample = a,standard = st, ploidy = pl, cellularity = cell, title = paste0(pd$name[a], " - chosen model"))
   for (m in 1:length(list)) {
-    plots[[3+m]] <- singleplot(matias96,QDNAseqobjectsample = a, cellularity = list[m], title = pd$name[a])
+    plots[[3+m]] <- singleplot(object,QDNAseqobjectsample = a, cellularity = list[m], title = pd$name[a])
   }
   dir.create("all_plots")
   if(length(plots)==7) {
