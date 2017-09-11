@@ -1,3 +1,9 @@
+# This is basically a copy of the singleplot function, with some minor adjustments to line sizes et cetera
+# Customize your plots to your liking with this function. You can call it singleplot and source it to overwrite the ACNE singleplot function
+# Note that this will not change the output of acne, because it does not use singleplot, but it will affect postanalysisloop!
+# Note that this code still depends on ACNE function ObjectsampleToTemplate if you are using a QDNAseq-object as template
+
+
 customplot <- function(template,cellularity = 1, error, ploidy = 2, standard, title = "Plot",QDNAseqobjectsample = FALSE, cap = 12, chrsubset) {
   library(ggplot2)
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
