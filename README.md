@@ -13,9 +13,7 @@ There are currently eight functions: **ACE**, **ploidyplotloop**, **Objectsample
 
 **ploidyplotloop** is the meat of **ACE**, and it can be run as a separate function as well. It takes a QDNAseq-object as input and also needs a folder to write the files to. This function is particularly handy if you want to analyze a whole QDNAseq-object that is already loaded in your R environment.
 
-**ObjectsampleToTemplate** is pretty much there to parse QDNAseqobjects into the dataframe structure used by the **singlemodel** and 
-
-**singleplot** functions. These latter functions call **ObjectsampleToTemplate** itself when necessary, but it can be handy to make a template if you expect some repeated use of the functions or if you want to make the template and then do your own obscure manipulations to it (you know you want to!)
+**ObjectsampleToTemplate** is pretty much there to parse QDNAseqobjects into the dataframe structure used by the **singlemodel** and **singleplot** functions. These latter functions call **ObjectsampleToTemplate** itself when necessary, but it can be handy to make a template if you expect some repeated use of the functions or if you want to make the template and then do your own obscure manipulations to it (you know you want to!)
 
 **singlemodel**: like the name implies it runs the fitting algorithm on a single sample and spits out the info you want! Not strictly necessary to save it to a variable, but that might still be handy. It returns a list with the model parameters, data, and errorplot. 
 
