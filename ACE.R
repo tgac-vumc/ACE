@@ -204,7 +204,7 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
   		tempplot <- ggplot() +
   		  scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
-  		  scale_x_continuous(name = "cellularity") +
+  		  scale_x_continuous(name = "cellularity (%)") +
   		  geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
   		  geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
   		  theme_classic() + theme(
@@ -374,7 +374,8 @@ ObjectsampleToTemplate <- function(copyNumbersSegmented, index = 1) {
 # this function takes a template dataframe as specified in the above function
 # you can use a QDNAseq object as "template", then specify QDNAseqobjectsample by the sample number!
 # e.g. model <- singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 3)
-singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FALSE, method = 'RMSE', penalty = 0) {
+singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FALSE, method = 'RMSE', penalty = 0, highlightminima = TRUE) {
+  library(ggplot2)
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
 	segmentdata <- rle(as.vector(na.exclude(template$segments)))
 	if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
@@ -424,20 +425,127 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
   
 	cellularity <- 5:100
 	tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
-	tempplot <- ggplot() +
-	  scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
-	  scale_x_continuous(name = "cellularity") +
-	  geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
-	  geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
-	  theme_classic() + theme(
-	    axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
-	  ggtitle("errorlist") +
-	  theme(plot.title = element_text(hjust = 0.5))
+	minimadf <- data.frame(minima=minima*100,rerror)
+	if(highlightminima==TRUE) {
+  	tempplot <- ggplot() +
+  	  scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
+  	  scale_x_continuous(name = "cellularity (%)") +
+  	  geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
+  	  geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
+  	  geom_point(aes(y=rerror, x=minima), data=minimadf, color = 'red') +
+  	  theme_classic() + theme(
+  	    axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
+  	  ggtitle("errorlist") +
+  	  theme(plot.title = element_text(hjust = 0.5))
+	} else {
+	  tempplot <- ggplot() +
+	    scale_y_continuous(name = "relative error", limits = c(0,1.05), expand=c(0,0)) +
+	    scale_x_continuous(name = "cellularity (%)") +
+	    geom_vline(xintercept = seq(from = 10, to = 100, by = 10), color = "#666666", linetype = "dashed") +
+	    geom_point(aes(y=errorlist, x=cellularity), data=tempdf) +
+	    theme_classic() + theme(
+	      axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
+	    ggtitle("errorlist") +
+	    theme(plot.title = element_text(hjust = 0.5))
+	}
 	
-	return(list(ploidy=ploidy,standard=standard,minima=minima,rerror=rerror,errorlist=errorlist,errorplot=tempplot))
+	return(list(ploidy=ploidy,standard=standard,method=method,penalty=penalty,minima=minima,rerror=rerror,errorlist=errorlist,errorplot=tempplot))
 	
 }
 
+
+# Turns out, tumors are often quite messy, genomically speaking
+# Occasionally, you might want to be able to compare the fits at 2N directly with the fits at other ploidies
+# Also, with pooring quality or lots of subclonality, it is more common for the standard to be messed up
+# In line with graphs presented by ASCAT and CELLULOID, squaremodel will do fitting and plot a graph for 
+#   fits using two variables: ploidy and cellularity
+# The use of a standard is no longer necessary: the fits are all using standard = 1
+# This is relevant to keep in mind, because you have to specify standard = 1 if you use the fit in singleplot
+# On top of the penalty for low cellularity, you can also add a penalty for ploidies
+# It is implemented as follows: error*(1+abs(ploidy-2))^penploidy
+# The plot has the two variables as axis and the color code indicates the relative error
+# To make the minima pop out, the color code is the inverse of the relative error
+# Minima are found by checking each value for neighboring values, and will only return true if its the lowest error
+squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5, pbottom=1, method = 'RMSE', penalty = 0, penploidy = 0, highlightminima = TRUE) {
+  library(ggplot2)
+  library(Biobase)
+  if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
+  segmentdata <- rle(as.vector(na.exclude(template$segments)))
+  
+  fraction <- c()
+  errormatrix <- matrix(nrow=(prows+1),ncol=96)
+  listofploidy <- c()
+  listofcellularity <- c()
+  listoferrors <- c()
+  for (t in 0:prows) {
+    ploidy <- ptop-((ptop-pbottom)/prows)*t
+    listofploidy <- append(listofploidy, rep(ploidy,96))
+    expected <- c()
+    temp <- c()
+    errorlist <- c()
+    for (i in 5:100) {
+      fraction[i-4] <- i/100
+      baseline <- 1-fraction[i-4]
+      for (p in 1:12) {
+        expected[p] <- baseline + p*fraction[i-4]/ploidy
+      }
+      for (j in 1:length(segmentdata$values)) {
+        if(method=='RMSE') {temp[j] <- min(((segmentdata$values[j]-expected)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty))^2,0.25)}
+        else if(method=='SMRE') {temp[j] <- min(sqrt(abs((segmentdata$values[j]-expected)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty))),sqrt(0.5))}
+        else if(method=='MAE') {temp[j] <- min(abs((segmentdata$values[j]-expected)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty)),0.5)}
+        else {print("Not a valid method")}
+      }
+      if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
+      else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
+      else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
+    }
+    listofcellularity <- append(listofcellularity, fraction)
+    listoferrors <- append(listoferrors, errorlist)
+    errormatrix[t+1,] <- errorlist
+    
+  }
+  minimat <- matrix(nrow=(prows+1),ncol=96)
+  for (i in 1:(prows+1)) {
+    for (j in 1:96) {
+      if (i==1|i==(prows+1)|j==1|j==96) {
+        minimat[i,j] <- FALSE
+      } else {
+        minimat[i,j] <- errormatrix[i,j]==min(errormatrix[(i-1):(i+1),(j-1):(j+1)])
+      }
+    }
+  }
+  round(errormatrix, digits = 10)
+  round(listoferrors, digits = 10)
+  errordf <- data.frame(ploidy=listofploidy,
+                        cellularity=listofcellularity,
+                        error=listoferrors/max(listoferrors),
+                        minimum=as.vector(t(minimat)))
+  minimadf <- errordf[which(errordf$minimum==TRUE),]
+  if(highlightminima==TRUE){
+    tempplot <- ggplot() +
+      geom_raster(data=errordf, aes(x=cellularity, y=ploidy, fill=1/error)) +
+      geom_point(data=minimadf, aes(x=cellularity, y=ploidy, alpha=min(error)/error), shape=16) +
+      scale_fill_gradient(low="green", high="red") +
+      ggtitle("Matrix of errors") +
+      theme(plot.title = element_text(hjust = 0.5))
+  } else {
+    tempplot <- ggplot() +
+      geom_raster(data=errordf, aes(x=cellularity, y=ploidy, fill=1/error)) +
+      scale_fill_gradient(low="green", high="red") +
+      ggtitle("Matrix of errors") +
+      theme(plot.title = element_text(hjust = 0.5))
+  }
+
+  return(list(method=method, 
+              penalty=penalty, 
+              penploidy=penploidy,
+              errormatrix=errormatrix, 
+              minimatrix = minimat, 
+              errordf=errordf, 
+              minimadf=minimadf, 
+              matrixplot=tempplot))
+  
+}
 
 # this function takes a template dataframe as specified in ObjectsampleToTemplate
 # you can use a QDNAseq object as "template", then specify QDNAseqobjectsample by the sample number!
