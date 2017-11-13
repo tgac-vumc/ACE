@@ -96,7 +96,7 @@ loop_squaremodel <- function(object,ptop=5,pbottom=1,prows=100,method='RMSE',pen
       dev.off()
     } else {
       imagefunction(file.path(outputdir,paste0("matrixplots.",imagetype)),width=1440,height = 480*ceiling(length(matrixplots)/2))
-      print(multiplot(plotlist = likelyplots, cols=2))
+      print(multiplot(plotlist = matrixplots, cols=2))
       dev.off()
     }
   }
