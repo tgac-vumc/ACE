@@ -1,5 +1,5 @@
 ##### ACE has arrived! #####
-# There are currently eight functions: ACE, ploidyplotloop, ObjectsampleToTemplate, singlemodel, singleplot, getadjustedsegments, linkmutationdata, postanalysisloop, analyzegenomiclocations.
+# There are several functions: ACE, ploidyplotloop, ObjectsampleToTemplate, singlemodel, singleplot, getadjustedsegments, linkmutationdata, postanalysisloop, analyzegenomiclocations.
 # I have also added the "multiplot" function for making summary sheets.
 
 # ACE takes a folder with rds-files (default, make sure all are segmented) or bam-files and returns plots for the most likely errors in convenient subfolders
