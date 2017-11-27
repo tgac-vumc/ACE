@@ -489,7 +489,7 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
     for (i in 5:100) {
       fraction[i-4] <- i/100
       for (p in 1:12) {
-        expected[p] <- standard*(1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2))
+        expected[p] <- 1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2)
       }
       for (j in 1:length(segmentdata$values)) {
         if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty))^2}
