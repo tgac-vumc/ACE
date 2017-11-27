@@ -142,10 +142,8 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		
   		for (i in 5:100) {
   		  fraction[i-4] <- i/100
-  		  baseline <- standard-fraction[i-4]*standard
   		  for (p in 1:12) {
-  			expected[p] <- baseline + p*fraction[i-4]*standard/q
-  			
+  		    expected[p] <- standard*(1+(p-q)*fraction[i-4]/(fraction[i-4]*(q-2)+2))
   		  }
   		  # the maximum error 0.5 was added to make sure hyperamplifications (p>12) don't get ridiculous errors
   		  for (j in 1:length(segmentdata$values)) {
@@ -238,8 +236,8 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 
   		for (m in 1:length(minima)) {
   		  fitpicker[a,m+4] <- minima[m]
-  		  adjustedcopynumbers <- q + (copyNumbersSegmented@assayData$copynumber[,a]-standard)/((1/q)*minima[m]*standard)
-  		  adjustedsegments <- q + (copyNumbersSegmented@assayData$segmented[,a]-standard)/((1/q)*minima[m]*standard)
+  		  adjustedcopynumbers <- q + ((copyNumbersSegmented@assayData$copynumber[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
+  		  adjustedsegments <- q + ((copyNumbersSegmented@assayData$segmented[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
   		  df <- as.data.frame(cbind(bin,adjustedcopynumbers,adjustedsegments))
   		  colnames(df)[2] <- "copynumbers"
   		  colnames(df)[3] <- "segments"
@@ -392,9 +390,8 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
 	errorlist <- c()
 	for (i in 5:100) {
 		fraction[i-4] <- i/100
-		baseline <- standard-fraction[i-4]*standard
 		for (p in 1:12) {
-		  expected[p] <- baseline + p*fraction[i-4]*standard/ploidy
+		  expected[p] <- standard*(1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2))
 		}
 		for (j in 1:length(segmentdata$values)) {
 		  if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))^2}
@@ -491,9 +488,8 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
     errorlist <- c()
     for (i in 5:100) {
       fraction[i-4] <- i/100
-      baseline <- 1-fraction[i-4]
       for (p in 1:12) {
-        expected[p] <- baseline + p*fraction[i-4]/ploidy
+        expected[p] <- standard*(1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2))
       }
       for (j in 1:length(segmentdata$values)) {
         if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty))^2}
@@ -563,8 +559,8 @@ singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, ti
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
   if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
-  adjustedcopynumbers <- ploidy + (template$copynumbers-standard)/((1/ploidy)*cellularity*standard)
-	adjustedsegments <- ploidy + (template$segments-standard)/((1/ploidy)*cellularity*standard)
+  adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
+	adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
 	df <- data.frame(bin=template$bin,adjustedcopynumbers,adjustedsegments)
 	
 	rlechr <- rle(as.vector(template$chr))
@@ -647,8 +643,8 @@ getadjustedsegments <- function(template,cellularity = 1, ploidy = 2, standard, 
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
   if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
-  adjustedcopynumbers <- ploidy + (template$copynumbers-standard)/((1/ploidy)*cellularity*standard)
-  adjustedsegments <- ploidy + (template$segments-standard)/((1/ploidy)*cellularity*standard)
+  adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
+  adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   template.na <- na.exclude(template)
   adjsegmentdata <- rle(as.vector(na.exclude(adjustedsegments)))
   adjcopynumberdata <- as.vector(na.exclude(adjustedcopynumbers))
