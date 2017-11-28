@@ -1,6 +1,6 @@
 two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,standard1,
                                template2,index2=FALSE,ploidy2=2,cellularity2=1,standard2,
-                               equalsegments=FALSE,plot=TRUE,cap=12) {
+                               equalsegments=FALSE,plot=TRUE,cap=12,qcap=12) {
   library(ggplot2)
   library(Biobase)
   if(index1) {template1 <- ObjectsampleToTemplate(template1, index1)}
@@ -10,11 +10,9 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
   if(missing(standard1)) { standard1 <- median(rep(segmentdata1$values,segmentdata1$lengths)) }
   adjustedcopynumbers1 <- ploidy1 + ((template1$copynumbers-standard1)*(cellularity1*(ploidy1-2)+2))/(cellularity1*standard1)
   adjcnna1 <- as.vector(na.exclude(adjustedcopynumbers1))
-  #adjustedsegments1 <- ploidy1 + ((template1$segments-standard1)*(cellularity1*(ploidy1-2)+2))/(cellularity1*standard1)
   if(missing(standard2)) { standard2 <- median(rep(segmentdata2$values,segmentdata2$lengths)) }
   adjustedcopynumbers2 <- ploidy2 + ((template2$copynumbers-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
   adjcnna2 <- as.vector(na.exclude(adjustedcopynumbers2))
-  #adjustedsegments2 <- ploidy2 + ((template2$segments-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
   template1na <- na.exclude(template1)
   template1na <- template1na[,1:4]
   template1na$copynumbers <- adjcnna1
@@ -65,12 +63,15 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
     bincounter <- 1
     segmentcounter <- 0
     if(class(equalsegments)!="numeric"){equalsegments<-20}
-    #nos <- c()
-    #leftovers <- c()
     for (c in 1:22) {
       nos <- floor(length(template1na$chr[which(template1na$chr==c)])/equalsegments)
       leftovers <- length(template1na$chr[which(template1na$chr==c)])%%equalsegments
       nobs <- rep(equalsegments,nos)
+      if (nos == 0) {
+        nos <- 1
+        nobs <- leftovers
+        leftovers <- 0
+      }
       if (leftovers > 0) {
         for (a in 0:(leftovers-1)) {
           index <- a%%nos+1
@@ -110,7 +111,7 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
       binchrmdl <- append(binchrmdl, currentmiddle)
     }
     compareplot <- ggplot() +
-      scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0)) +
+      scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0), sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
       scale_x_continuous(name = "chromosome", limits = c(0,binchrend[22]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
       geom_bar(aes(x=bin, y = -log(q_value,10)), data=df, fill='green', stat='identity') +
       geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
