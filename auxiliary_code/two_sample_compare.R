@@ -98,8 +98,9 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
   q_value <- p.adjust(p_value,method="BH")
   combinedsegmentsdf <- data.frame(Chromosome,Start,End,Num_Bins,Mean1,SE1,Mean2,SE2,p_value,q_value)
   if (plot==TRUE) {
-    q_capped <- sapply(q_value, function(x) max(10^-cap,x))
-    df <- data.frame(bin=template1na$bin,Mean1=rep(Mean1,Num_Bins),Mean2=rep(Mean2,Num_Bins),q_value=rep(q_capped,Num_Bins))
+    q_capped <- sapply(q_value, function(x) max(10^-qcap,x))
+    q_corrected <- -log(q_capped,10)*cap/qcap
+    df <- data.frame(bin=template1na$bin,Mean1=rep(Mean1,Num_Bins),Mean2=rep(Mean2,Num_Bins),q_value=rep(q_corrected,Num_Bins))
     rlechr <- rle(as.vector(template1$chr))
     binchrend <- c()
     currentbin <- 0
@@ -113,7 +114,7 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
     compareplot <- ggplot() +
       scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0), sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
       scale_x_continuous(name = "chromosome", limits = c(0,binchrend[22]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-      geom_bar(aes(x=bin, y = -log(q_value,10)), data=df, fill='green', stat='identity') +
+      geom_bar(aes(x=bin, y = q_value), data=df, fill='green', stat='identity') +
       geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
       geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
       geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
@@ -124,4 +125,19 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
     
     return(list(two_sample_df=combinedsegmentsdf,compareplot=compareplot))
   } else {return(combinedsegmentsdf)}
+}
+
+
+ObjectsampleToTemplate <- function(copyNumbersSegmented, index = 1) {
+  library(Biobase)
+  library(QDNAseq)
+  fd <- fData(copyNumbersSegmented)
+  segments <- as.vector(copyNumbersSegmented@assayData$segmented[,index])
+  copynumbers <- as.vector(copyNumbersSegmented@assayData$copynumber[,index])
+  chr <- as.vector(fd$chromosome)
+  start <- as.vector(fd$start)
+  end <- as.vector(fd$end)
+  bin <- 1:length(chr)
+  template <- data.frame(bin,chr,start,end,copynumbers,segments)
+  return(template)
 }
