@@ -276,36 +276,53 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
     			annotate("text", x = binchrmdl[2], y = cap-0.7, label = line2) +
     			geom_rect(aes(xmin=binchrmdl[12], xmax = binchrmdl[22], ymin = cap-0.9, ymax = cap), fill = 'white') +
     			annotate("text", x = binchrmdl[16], y = cap-0.3, label = line3) +
-    			annotate("text", x = binchrmdl[16], y = cap-0.7, label = line4)
+    			annotate("text", x = binchrmdl[16], y = cap-0.7, label = line4) +
+  		    theme(plot.title = element_text(hjust = 0.5))
   		  plots[[m]] <- tempplot
   		  if(bfi==m) {
-  #		    bfplots[[(4*(a-1)+1)]] <- tempplot
   		    likelyplots[[(3*(a-1)+1)]] <- tempplot
-  		    imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)))
+  		    if(imagetype %in% c('pdf','svg')) {
+  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)),width=10.5)
+  		    } else {
+  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_bestfit_",q,"N.",imagetype)),width=720)
+  		    }  
   		    print(tempplot)
   		    dev.off()  
   		  }
   		  if(m==length(minima)) {
-  #		    lmplots[[(4*(a-1)+1)]] <- tempplot
   		    likelyplots[[(3*(a-1)+2)]] <- tempplot
-  		    imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)))
+  		    if(imagetype %in% c('pdf','svg')) {
+  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)),width=10.5)
+  		    } else {
+  		      imagefunction(file.path(qdir,"likelyfits",paste0(pd$name[a],"_lastminimum_",q,"N.",imagetype)),width=720)
+  		    }
   		    print(tempplot)
   		    dev.off() 
   		  }
-  		  imagefunction(fn)
-  		  # the print command is necessary when ggplotting in loops!
+  		  if(imagetype %in% c('pdf','svg')) {
+  		    imagefunction(fn,width=10.5)
+  		  } else {
+  		    imagefunction(fn,width=720)
+  		  }
   		  print(tempplot)
   		  dev.off()
   		}
   			
-  		if(imagetype == 'pdf') {
-  		  imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)))
+  		if(imagetype %in% c('pdf','svg')) {
+  		  pdf(file.path(fp,paste0("summary_",pd$name[a],".pdf")),width=10.5)
   		  print(plots)
   		  dev.off()
-  		} else { 
-  		  imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)), width = 1920, height = 480*ceiling(length(plots)/4))
-  		  if (length(plots)==1) {print(plots)} else { print(multiplot(plotlist = plots, cols=4)) }
-  		  dev.off()
+  		} else {
+  		  if (length(plots)==1) {
+  		    imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)), width = 720)
+  		    print(plots)
+  		    dev.off()
+  		  } else {
+    		  imagefunction(file.path(fp,paste0("summary_",pd$name[a],".",imagetype)), width = 2160, height = 480*ceiling(length(plots)/3))
+    		  print(multiplot(plotlist = plots, cols=3)) 
+    		  dev.off()
+    		}
+    		  
   		}
   		  
   	}
@@ -313,27 +330,15 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 	
   	
   	if(printsummaries == TRUE) {
-    	if(imagetype == 'pdf') {
-  #    	  imagefunction(file.path(qdir,paste0("summary_bestfits.",imagetype)))
-  #    	  print(bfplots)
-  #    	  dev.off()
-  #  	  imagefunction(file.path(qdir,paste0("summary_lastminima.",imagetype)))
-  #    	  print(lmplots)
-  #    	  dev.off()
-    	  imagefunction(file.path(qdir,paste0("summary_likelyfits.",imagetype)))
+    	if(imagetype %in% c('pdf','svg')) {
+    	  pdf(file.path(qdir,"summary_likelyfits.pdf"),width=10.5)
       	  print(likelyplots)
       	  dev.off()
-      	imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)))
+      	pdf(file.path(qdir,"summary_errors.pdf"))
       	  print(listerrorplots)
       	  dev.off()
       	} else { 
-  #    	  imagefunction(file.path(qdir,paste0("summary_bestfits.",imagetype)), width = 1920, height = 480*length(pd$name))
-  #    	  print(multiplot(plotlist = bfplots, cols=4))
-  #    	  dev.off()
-  #  	  imagefunction(file.path(qdir,paste0("summary_lastminima.",imagetype)), width = 1920, height = 480*length(pd$name))
-  #    	  print(multiplot(plotlist = lmplots, cols=4))
-  #    	  dev.off()
-    	  imagefunction(file.path(qdir,paste0("summary_likelyfits.",imagetype)), width = 1440, height = 480*length(pd$name))
+    	  imagefunction(file.path(qdir,paste0("summary_likelyfits.",imagetype)), width = 2160, height = 480*length(pd$name))
       	  print(multiplot(plotlist = likelyplots, cols=3))
       	  dev.off()
       	imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)), width = 1920, height = 480*ceiling(length(pd$name)/4))
@@ -341,14 +346,14 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
       	  dev.off()
       	}
   	} else if(printsummaries == 2) {
-  	  if(imagetype == 'pdf') {
-  	    imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)))
+  	  if(imagetype %in% c('pdf','svg')) {
+  	    pdf(file.path(qdir,"summary_errors.pdf"))
   	    print(listerrorplots)
   	    dev.off()
   	    } else { 
   	    imagefunction(file.path(qdir,paste0("summary_errors.",imagetype)), width = 1920, height = 480*ceiling(length(pd$name)/4))
   	    if (length(listerrorplots)==1){print(listerrorplots)} else {print(multiplot(plotlist = listerrorplots, cols=4))}
-  	    dev.off()
+  	      dev.off()
   	   }
   	} 
 	
@@ -378,9 +383,11 @@ ObjectsampleToTemplate <- function(copyNumbersSegmented, index = 1) {
 # this function takes a template dataframe as specified in the above function
 # you can use a QDNAseq object as "template", then specify QDNAseqobjectsample by the sample number!
 # e.g. model <- singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 3)
-singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FALSE, method = 'RMSE', penalty = 0, highlightminima = TRUE) {
+singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FALSE, method = 'RMSE', 
+                        exclude = c(), penalty = 0, highlightminima = TRUE) {
   library(ggplot2)
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
+  template <- template[!template$chr %in% exclude,]
 	segmentdata <- rle(as.vector(na.exclude(template$segments)))
 	if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
 			
@@ -469,10 +476,12 @@ singlemodel <- function(template,ploidy = 2, standard, QDNAseqobjectsample = FAL
 # The plot has the two variables as axis and the color code indicates the relative error
 # To make the minima pop out, the color code is the inverse of the relative error
 # Minima are found by checking each value for neighboring values, and will only return true if its the lowest error
-squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5, pbottom=1, method = 'RMSE', penalty = 0, penploidy = 0, highlightminima = TRUE) {
+squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5, pbottom=1, method = 'RMSE', 
+                        exclude = c(), penalty = 0, penploidy = 0, highlightminima = TRUE) {
   library(ggplot2)
   library(Biobase)
   if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
+  template <- template[!template$chr %in% exclude,]
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
   
   fraction <- c()
@@ -554,9 +563,20 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
 # this function takes a template dataframe as specified in ObjectsampleToTemplate
 # you can use a QDNAseq object as "template", then specify QDNAseqobjectsample by the sample number!
 # don't forget to specify cellularity, error, ploidy, and standard; you can find these in the model output
-singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, title = "Plot",QDNAseqobjectsample = FALSE, cap = 12, chrsubset) {
+singleplot <- function(template,cellularity = 1, error, ploidy = 2, standard, title,
+                       QDNAseqobjectsample = FALSE, trncname = FALSE, cap = 12, chrsubset) {
   library(ggplot2)
-  if(QDNAseqobjectsample) {template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)}
+  library(Biobase)
+  if(QDNAseqobjectsample) {
+    if(missing(title)) {
+      pd<-pData(template)
+      if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
+      if(trncname!=FALSE&&trncname!=TRUE) {pd$name <- gsub(trncname,"",pd$name)}
+      title <- pd$name[QDNAseqobjectsample]
+    }
+    template <- ObjectsampleToTemplate(template, QDNAseqobjectsample)
+  }
+  if(missing(title)) {title <- "Plot"}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
   if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
   adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
@@ -663,7 +683,7 @@ getadjustedsegments <- function(template,cellularity = 1, ploidy = 2, standard, 
     Start[i] <- as.vector(template.na$start)[counter]
     End[i] <- as.vector(template.na$end)[counter+adjsegmentdata$lengths[i]-1]
     Num_Probes[i] <- adjsegmentdata$lengths[i]
-    if(log==TRUE) {Segment_Mean[i] <- log2(adjsegmentdata$values[i])}
+    if(log==TRUE) {Segment_Mean[i] <- log2(segmentdata$values[i]/standard)}
     if(log==FALSE) {
       Segment_Mean[i] <- adjsegmentdata$values[i]
       Segment_Mean2[i] <- mean(adjcopynumberdata[counter:(counter+adjsegmentdata$lengths[i]-1)])
@@ -761,7 +781,7 @@ linkmutationdata <- function(filename, segmentdf, cellularity = 1,chrindex=1,pos
 
 postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix="",postfix="",trncname=FALSE,inputdir=FALSE,
                              chrindex=1,posindex=2,freqindex=3,append=TRUE,dontmatchnames=FALSE,
-                             printsegmentfiles=TRUE,printnewplots=TRUE,imagetype='pdf',outputdir="./"){
+                             printsegmentfiles=TRUE,printnewplots=TRUE,imagetype='pdf',outputdir="./",log=FALSE, segext='tsv'){
   if(!dir.exists(outputdir)) {dir.create(outputdir)}
   if(inputdir!=FALSE){
     if(missing(copyNumbersSegmented)) {
@@ -825,7 +845,7 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
         imagefunction <- get(imagetype)
         if(printnewplots==TRUE) {
           if (!dir.exists(file.path(outputdir,"newplots"))) {dir.create(file.path(outputdir,"newplots"))}
-          if(imagetype=='pdf'){
+          if(imagetype %in% c('pdf','svg')) {
             imagefunction(file.path(outputdir,"newplots",paste0(pd$name[a],".",imagetype)),width=10.5)
             print(newplots[[a]])
             dev.off()
@@ -835,7 +855,7 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
             dev.off()
           }
         }
-        segmentdf <- getadjustedsegments(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a)
+        segmentdf <- getadjustedsegments(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a,log=log)
         if(!missing(mutationdata)) {
           mutationfile <- file.path(mutationdata,paste0(prefix,pd$name[a],postfix,mutext))
           folder <- file.path(outputdir,"mutationdata")
@@ -843,7 +863,7 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
         }
         if(printsegmentfiles==TRUE){
           if (!dir.exists(file.path(outputdir,"segmentfiles"))) {dir.create(file.path(outputdir,"segmentfiles"))}
-          fn <- file.path(outputdir,"segmentfiles",paste0(pd$name[a],"_segments.tsv"))
+          fn <- file.path(outputdir,"segmentfiles",paste0(pd$name[a],"_segments.",segext))
           write.table(segmentdf,fn,sep="\t",row.names = FALSE, quote=FALSE)
         }
       }
