@@ -1,10 +1,23 @@
-two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,standard1,
-                               template2,index2=FALSE,ploidy2=2,cellularity2=1,standard2,
-                               equalsegments=FALSE,plot=TRUE,cap=12,qcap=12) {
+two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,standard1,name1,
+                               template2,index2=FALSE,ploidy2=2,cellularity2=1,standard2,name2,
+                               equalsegments=FALSE,plot=TRUE,cap=12,qcap=12,trncname=FALSE,legend=TRUE,chrsubset) {
   library(ggplot2)
   library(Biobase)
-  if(index1) {template1 <- ObjectsampleToTemplate(template1, index1)}
-  if(index2) {template2 <- ObjectsampleToTemplate(template2, index2)}
+  if (missing(template2)) {template2<-template1}
+  if(index1) {
+    pd1<-pData(template1)
+    if(trncname==TRUE) {pd1$name <- gsub("_.*","",pd1$name)}
+    if(trncname!=FALSE&&trncname!=TRUE) {pd1$name <- gsub(trncname,"",pd1$name)}
+    template1 <- ObjectsampleToTemplate(template1, index1)
+    if(missing(name1)) {name1<-pd1$name[index1]}
+  } else if(missing(name1)) {name1<-"sample1"}
+  if(index2) {
+    pd2<-pData(template2)
+    if(trncname==TRUE) {pd2$name <- gsub("_.*","",pd2$name)}
+    if(trncname!=FALSE&&trncname!=TRUE) {pd2$name <- gsub(trncname,"",pd2$name)}
+    template2 <- ObjectsampleToTemplate(template2, index2)
+    if(missing(name2)) {name2<-pd2$name[index2]}
+  } else if(missing(name2)) {name2<-"sample2"}
   segmentdata1 <- rle(as.vector(na.exclude(template1$segments)))
   segmentdata2 <- rle(as.vector(na.exclude(template2$segments)))
   if(missing(standard1)) { standard1 <- median(rep(segmentdata1$values,segmentdata1$lengths)) }
@@ -17,7 +30,7 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
   template1na <- template1na[,1:4]
   template1na$copynumbers <- adjcnna1
   template2na <- na.exclude(template2)
-  template2na <- na.exclude(template2na[,1:4])
+  template2na <- template2na[,1:4]
   template2na$copynumbers <- adjcnna2
   
   if(length(template1na$chr)!=length(template2na$chr)){print("bins not matching")}
@@ -74,8 +87,8 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
       }
       if (leftovers > 0) {
         for (a in 0:(leftovers-1)) {
-          index <- a%%nos+1
-          nobs[index] <- nobs[index] + 1
+          divvy <- a%%nos+1
+          nobs[divvy] <- nobs[divvy] + 1
         }
       }
       for (i in 1:nos) {
@@ -111,17 +124,49 @@ two_sample_compare <- function(template1,index1=FALSE,ploidy1=2,cellularity1=1,s
       binchrend <- append(binchrend, currentbin)
       binchrmdl <- append(binchrmdl, currentmiddle)
     }
-    compareplot <- ggplot() +
-      scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0), sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
-      scale_x_continuous(name = "chromosome", limits = c(0,binchrend[22]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-      geom_bar(aes(x=bin, y = q_value), data=df, fill='green', stat='identity') +
-      geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-      geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
-      geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
-      geom_point(aes(x = bin,y = Mean1),data=df, size = 1, color = 'red') +
-      geom_point(aes(x = bin,y = Mean2),data=df, size = 1, color = 'blue') +
-      theme_classic() + theme(
-        axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black'))
+    if(missing(chrsubset)){
+      compareplot <- ggplot() +
+        scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0), sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
+        scale_x_continuous(name = "chromosome", limits = c(0,binchrend[22]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
+        geom_bar(aes(x=bin, y = q_value), data=df, fill='green', stat='identity') +
+        geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
+        geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
+        geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
+        geom_point(aes(x = bin,y = Mean1),data=df, size = 1, color = 'red') +
+        geom_point(aes(x = bin,y = Mean2),data=df, size = 1, color = 'blue') +
+        theme_classic() + theme(
+          axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black'))
+        
+      if (legend==TRUE){
+        compareplot <- compareplot +
+          geom_rect(aes(xmin=binchrmdl[1]/10, xmax = binchrmdl[4], ymin = cap-0.9, ymax = cap), fill = 'white') +
+          annotate("text", x = binchrend[2], y = cap-0.2, label = name1, color = 'red') +
+          annotate("text", x = binchrend[2], y = cap-0.6, label = name2, color = 'blue')
+      }
+    } else {
+      firstchr <- range(chrsubset)[1]
+      lastchr <- range(chrsubset)[2]
+      if(firstchr==1){firstbin<-0
+      } else {firstbin<-binchrend[firstchr-1]+1}
+      compareplot <- ggplot() +
+        scale_y_continuous(name = "copies", limits = c(0,cap), breaks = c(0:cap), expand=c(0,0), sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
+        scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), breaks = binchrmdl[firstchr:lastchr], labels = firstchr:lastchr, expand = c(0,0)) +
+        geom_bar(aes(x=bin, y = q_value), data=df, fill='green', stat='identity') +
+        geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
+        geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
+        geom_vline(xintercept = binchrend[firstchr:lastchr], color = "#666666", linetype = "dashed") +
+        geom_point(aes(x = bin,y = Mean1),data=df, size = 1, color = 'red') +
+        geom_point(aes(x = bin,y = Mean2),data=df, size = 1, color = 'blue') +
+        theme_classic() + theme(
+          axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black'))
+      
+      if (legend==TRUE){
+        compareplot <- compareplot +
+          geom_rect(aes(xmin=firstbin+1, xmax = firstbin+(binchrend[lastchr]-firstbin)/3.5, ymin = cap-0.9, ymax = cap), fill = 'white') +
+          annotate("text", x = firstbin+(binchrend[lastchr]-firstbin)/7, y = cap-0.2, label = name1, color = 'red') +
+          annotate("text", x = firstbin+(binchrend[lastchr]-firstbin)/7, y = cap-0.6, label = name2, color = 'blue')
+      }
+    }  
     
     return(list(two_sample_df=combinedsegmentsdf,compareplot=compareplot))
   } else {return(combinedsegmentsdf)}
