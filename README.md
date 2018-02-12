@@ -31,5 +31,5 @@ There are a number of functions: **ACE**, **ploidyplotloop**, **ObjectsampleToTe
 
 There are some more snippets of advice in the code. For a walkthrough ... try the walkthrough! 
 
-That's pretty much it for now, let me know if you run into some errors or oddities j.poell@vumc.nl
+That's pretty much it for now, let us know if you run into some errors or oddities: j.poell@vumc.nl and rh.brakenhoff@vumc.nl
 

@@ -60,7 +60,7 @@
 # to quickly calculate mutant copies, but then you also need to enter cellularity! Note: the function requires the dataframe with
 # adjusted segments (output of getadjustedsegments)
 
-# That's pretty much it for now, let me know if you run into some errors or oddities j.poell@vumc.nl
+# That's pretty much it for now, let us know if you run into some errors or oddities j.poell@vumc.nl and rh.brakenhoff@vumc.nl
 
 ACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies = 2, imagetype = 'pdf', method = 'RMSE', penalty = 0, cap = 12, trncname = FALSE, printsummaries = TRUE) { 
 	imagefunction <- get(imagetype)
