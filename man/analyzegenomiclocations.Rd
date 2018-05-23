@@ -24,9 +24,7 @@ The formula that calculates mutant copies only works if the variant is not prese
 \value{
 Returns a data frame with Chromosome, Position, Copynumbers. When \code{Frequency} is given as an argument, also returns Mutant_copies.
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }

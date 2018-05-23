@@ -29,15 +29,17 @@ squaremodel(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5, pbottom=1,
 Unlike other functionality of ACE, \code{squaremodel} does not use the "standard", but it fits all tested ploidies to "standard = 1". It is therefore necessary that segment values are normalized to 1 (which they are by default coming from QDNAseq). The penalty parameter is the same as in \code{singlemodel}. Additionally, it is possible to penalize fits at ploidies diverging from 2N using the penploidy parameter. For other details on the fitting algorithm, see \code{\link{singlemodel}}. Range of ploidies is set by parameters ptop and pbottom, and resolution is determined by prows. To create good contrast in the matrixplot, the color scale derives from the inverse of the error, and the opacity of the dots marking the minima is calculated as min(error)/error.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Returns a list, containing
+  \item{method}{Applied error method}
+  \item{penalty}{Applied penalty factor for low cellularities}
+  \item{penploidy}{Applied penalty factor for diverging ploidies}
+  \item{errormatrix}{Numeric matrix with errors of all combinations of ploidy and cellularity}
+  \item{minimatrix}{Logical matrix indicating whether the combination of ploidy and cellularity represents a minimum}
+  \item{errordf}{Data frame with columns ploidy, cellularity, error, and minimum}
+  \item{minimadf}{Same as errordf, but only containing minima and sorted by error}
+  \item{matrixplot}{ggplot2-graph of the relative errors calculated at each combination of ploidy and cellularity}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }

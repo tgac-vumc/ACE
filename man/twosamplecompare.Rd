@@ -51,9 +51,7 @@ This function can be used for different types of comparisons. It can be used to 
 \item compareplot - ggplot2-graph of both samples with segment values in red (first sample) and blue (second sample). Green bars indicate q-values of the segments, scaled on the secondary axis
 }
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }

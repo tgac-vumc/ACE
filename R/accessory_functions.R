@@ -28,6 +28,7 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   template$chr <- gsub("chr","",template$chr,ignore.case = TRUE)
   df <- template
   templatena <- na.exclude(template)
+  bin <- templatena$bin
   df$adjustedcopynumbers <- adjustedcopynumbers
   df$adjustedsegments <- adjustedsegments
   num_bins <- segmentdata$lengths
@@ -209,6 +210,7 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
   adjustedcopynumbers2 <- ploidy2 + ((template2$copynumbers-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
   adjcnna2 <- as.vector(na.exclude(adjustedcopynumbers2))
   template1na <- na.exclude(template1)
+  bin <- template1na$bin
   if(altmethod==FALSE){
     template1na <- template1na[,1:4]
     template1na$copynumbers <- adjcnna1
@@ -727,8 +729,6 @@ compresstemplate <- function(template, factor = 20, funtype = 'median'){
 
 templatefromequalsegments <- function(template, QDNAseqobjectsample = FALSE, equalsegments = 20, funtype = 'mean', chrsubset, onlyautosomes = TRUE) {
   fun <- get(funtype)
-  library(Biobase)
-  library(QDNAseq)
   if(QDNAseqobjectsample) {
     template <- objectsampletotemplate(template, QDNAseqobjectsample)
   } else { template$chr <- gsub("chr","",template$chr,ignore.case = TRUE)} 

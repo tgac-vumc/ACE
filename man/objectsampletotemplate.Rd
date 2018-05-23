@@ -19,19 +19,11 @@ objectsampletotemplate(copyNumbersSegmented, index = 1)
   \item{copyNumbersSegmented}{QDNAseqCopyNumbers object with segmented data}
   \item{index}{Integer. Specifies the index of the sample}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Returns a template data frame with the columns bin, chromosome, copynumbers, and segments (when available)
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }

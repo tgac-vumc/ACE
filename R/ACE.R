@@ -248,6 +248,8 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  colnames(df)[2] <- "copynumbers"
   		  colnames(df)[3] <- "segments"
   		  dfna <- na.exclude(df)
+  		  copynumbers <- dfna$copynumbers
+  		  segments <- dfna$segments
   		  cappedcopynumbers <- dfna[dfna$copynumbers > cap,]
   		  if(length(cappedcopynumbers$copynumbers)>0) {cappedcopynumbers$copynumbers <- cap-0.1}
   		  cappedsegments <- dfna[dfna$segments > cap,]
@@ -488,7 +490,8 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
   if(QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
   template <- template[!template$chr %in% exclude,]
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  
+  cellularity <- 5:100
+  error <- c()
   fraction <- c()
   errormatrix <- matrix(nrow=(prows+1),ncol=96)
   listofploidy <- c()
@@ -611,6 +614,9 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
 	colnames(df)[4] <- "segments"
 	
 	dfna <- na.exclude(df)
+	bin <- dfna$bin
+	copynumbers <- dfna$copynumbers
+	segments <- dfna$segments
 	if(bottom=="min"){bottom<-floor(min(dfna$copynumbers))}
 	if(cap=="max"){cap<-ceiling(max(dfna$copynumbers))}
 	if(!missing(chrsubset)){

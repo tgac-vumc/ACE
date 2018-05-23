@@ -9,7 +9,7 @@ ACEcall is the calling algorithm for ACE that utilizes the absolute copy number 
 }
 \usage{
 ACEcall(template, QDNAseqobjectsample = FALSE, cellularity = 1, ploidy = 2, standard, 
-        plot = TRUE, title, pcutoff = -3, qcutoff = -3, subcutoff = 0.2, 
+        plot = TRUE, title, pcutoff, qcutoff = -3, subcutoff = 0.2, 
         trncname = FALSE, cap = 12, bottom = 0, chrsubset, onlyautosomes = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -46,9 +46,6 @@ The color code in the plot is as follows (in parentheses the call in the data fr
 \value{
 ACEcall returns a data frame that is similar to the input template, but it is supplemented with adjusted copy numbers, adjusted segment values, the segment mean and associated standard error, and the log10 p-value and q-value, which signifies the probability that if the true segment mean equals the general tumor ploidy (rounded to an integer), the resulting or a more extreme segment mean would be found. The q-value is the result of a Benjamini-Hochberg correction of the p-value, taking into account all tested segments. If the argument plot = TRUE, ACEcall will also return an absolute copy number plot (a ggplot2-object) with the segments color-coded to specify the calls. 
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{
 Jos B. Poell
 }
@@ -56,10 +53,8 @@ Jos B. Poell
 For biological reasons, a segment is called a double loss when it is highly likely that some cells do not harbor a single copy of the segment of interest. Therefore, a segment with exactly one copy in a triploid tumor will be called as a single loss, not a double loss. Note that \code{ACEcall} compares segments to integer copy numbers. It therefore needs to round the given ploidy to an integer as well. It uses the \code{round} function for this. 
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{singleplot}}
 }
 \examples{
 ## simulated data assuming each chromosome comprises 100 bins
@@ -79,7 +74,4 @@ data("copyNumbersSegmented")
 ## for derivations of the parameters for this fit, see documentation on squaremodel
 ACEcall(copyNumbersSegmented, QDNAseqobjectsample = 2, cellularity = 0.41, ploidy = 2.08, standard = 1)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

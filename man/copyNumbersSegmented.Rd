@@ -17,21 +17,17 @@ A QDNAseq-object with segmented copy number data of two tumor samples:
     \item{\code{copyNumbersSegmented@assayData$segmented}}{segment values saved in a matrix, rownames are bins (chr:start-end), colnames are sampleNames}
   }
 }
-\details{
-%%  ~~ If necessary, more details than the __description__ above ~~
+
+\value{
+  A QDNAseqCopyNumbers S4 object
 }
-\source{
-%%  ~~ reference to a publication or URL from which the data were obtained ~~
-}
-\references{
-%%  ~~ possibly secondary sources and usages ~~
-}
+
 \examples{
 data("copyNumbersSegmented")
 ## ploidyplotloop(copyNumbersSegmented, currentdir = ".")
-singlemodel(copyNumbersSegmented, which(sampleNames(copyNumbersSegmented)=='sample1'))
+singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 1)
 singleplot(copyNumbersSegmented, 1, cellularity = 0.79)
-model2 <- singlemodel(copyNumbersSegmented, which(sampleNames(copyNumbersSegmented)=='sample2'))
+model2 <- singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 2)
 singleplot(copyNumbersSegmented, 2, cellularity = with(model2, minima[which(rerror==min(rerror))]))
 }
 \keyword{datasets}

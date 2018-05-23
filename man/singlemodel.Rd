@@ -26,15 +26,17 @@ singlemodel(template, QDNAseqobjectsample = FALSE, ploidy = 2, standard,
 All ACE fitting algorithms work by calculating "expected values" of integer copies given a certain cellularity. It calculates these expected values for 1-12 copies at cellularities 0.05-1 (in increments of 0.01). First of all, this means that fits at cellularities below 0.05 are not calculated. These low-cellularity fits will not give very meaningful results, and only obscure more plausible fits. Second, it means that 0 copies and >12 copies are not "fitted". This prevents fits predicting many and/or large segments with 0 or >12 copies, which is biologically unlikely. More explanation is given in the vignette.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Returns a list, containing
+  \item{ploidy}{Absolute copy number that corresponds with the median segment value}
+  \item{standard}{Ploidy corresponds to this raw data value. Unless specified as argument, it corresponds to the median segment value}
+  \item{method}{Applied error method}
+  \item{penalty}{Applied penalty factor}
+  \item{minima}{Vector with cellularities at which the error reached a minimum}
+  \item{rerror}{Vector with relative errors corresponding to the minima}
+  \item{errorlist}{List of errors of all cellularities tested}
+  \item{errorplot}{ggplot2-graph of the relative errors calculated at each cellularity}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }

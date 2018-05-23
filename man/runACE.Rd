@@ -53,9 +53,7 @@ Since this is the core functionality of ACE, extensive documentation is availabl
     }
 }
 
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }

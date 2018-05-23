@@ -15,7 +15,7 @@ segmentstotemplate(segmentdf, chrci = 1, startci = 2, endci = 3, binsci = 4,
 \arguments{
   \item{segmentdf}{Data frame or file path. Data frame or file path to tab-delimited file with segment data}
   \item{chrci}{Integer. Specifies the index of the column containing chromosome information. Default = 1}
-  \item{starti}{Integer. Specifies the index of the column containing start positions. Default = 2}
+  \item{startci}{Integer. Specifies the index of the column containing start positions. Default = 2}
   \item{endci}{Integer. Specifies the index of the column containing end positions. Default = 3}
   \item{binsci}{Integer. Specifies the index of the column containing number of bins or number of probes. Default = 4}
   \item{meanci}{Integer. Specifies the index of the column containing the segment value. Default = 5}
@@ -29,9 +29,7 @@ Even though there is no copy number information for each bin, this needs to be p
 \value{
 Returns a template data frame. 
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }
@@ -49,8 +47,7 @@ Jos B. Poell
 \seealso{
 \code{\link{compresstemplate}}
 }
-\examples{
-}
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")

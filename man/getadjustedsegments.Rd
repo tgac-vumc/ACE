@@ -25,17 +25,10 @@ The output contains two columns for segment mean. The first is the adjusted segm
 \value{
 Returns a data frame with segment information
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
   \code{\link{objectsampletotemplate}}, \code{\link{squaremodel}}, \code{\link{singlemodel}}, \code{\link{singleplot}}, \code{\link{analyzegenomiclocations}}, \code{\link{postanalysisloop}}

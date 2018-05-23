@@ -10,8 +10,8 @@ Create \code{squaremodel} summaries for all samples in a QDNAseq-object
 \usage{
 loopsquaremodel(object, ptop = 5, pbottom = 1, prows = 100, 
                 method = 'RMSE', penalty = 0, penploidy = 0,
-                outputdir, imagetype = 'pdf', 
-                trncname = FALSE, printobjectsummary = TRUE)
+                outputdir, imagetype = 'pdf', trncname = FALSE, 
+                printplots = TRUE, printobjectsummary = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -34,9 +34,7 @@ This function is basically the squaremodel equivalent of \code{\link{ploidyplotl
 \value{
 Returns a list with squaremodels for each sample in a QDNAseq-object. If \code{printplots} is TRUE, the plots will be printed to file. If \code{printobjectsummary} is TRUE, an object summary will be printed, containing the matrixplot and the copy number plot of the best fit of each sample.  
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }
@@ -54,8 +52,10 @@ In case of large numbers of samples, you may have to set \code{printobjectsummar
   data("copyNumbersSegmented")
   loopsquaremodel(copyNumbersSegmented, penalty = 0.5, penploidy = 0.5)
   }
+lsm <- loopsquaremodel(copyNumbersSegmented, printplots = FALSE, printobjectsummary = FALSE, 
+                       penalty = 0.5, penploidy = 0.5)
+ls(lsm[[1]])
+lsm[[1]]$samplename
+lsm[[1]]$matrixplot
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

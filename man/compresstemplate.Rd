@@ -22,9 +22,7 @@ compresstemplate(template, factor = 20, funtype = "median")
 \value{
 Returns a template data frame with increased bin size and reduced number of features compared to the input data frame.
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }
@@ -37,10 +35,12 @@ Segmentation is slightly affected by this function due to the fact that the brea
 \seealso{
 \code{\link{objectsampletotemplate}}, \code{\link{segmentstotemplate}}
 }
-\examples{
 
+\examples{
+## segmented data from a QDNAseq-object
+data("copyNumbersSegmented")
+template <- objectsampletotemplate(copyNumbersSegmented, index = 1)
+ct <- compresstemplate(template, factor = 10)
+length(template$bin)
+length(ct$bin)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

@@ -25,9 +25,7 @@ Calculating and plotting correlation of segments between samples can be helpful 
 \value{
 Returns a matrix with sample names defining both rows and columns and cells containing the pearson correlation of segment values of all bins of the intersecting samples. 
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }

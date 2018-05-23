@@ -22,23 +22,14 @@ squaremodelsummary(template, QDNAseqobjectsample = FALSE, squaremodel, samplenam
   \item{imagetype}{Character string. Plots are printed to file using this graphics device. "pdf" will result in 8 pages with individual plots, while the other devices print a 2x4 mosaic. Default = "pdf"}
   \item{trncname}{Logical. If set to TRUE, \code{trncname} truncates the sample name from the first instance of "_" in the name. You can also specify the regular expression here, e.g. trncname = "-.*" truncates the name from the first dash. Default = FALSE}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{
 Returns a list with eight plots (ggplot2-objects): the matrixplot and the copy number plots corresponding to the seven best fits. If printplots is TRUE, the plots will be printed to file. 
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 \code{\link{squaremodel}}
@@ -65,9 +56,6 @@ sqm <- squaremodel(copyNumbersSegmented, QDNAseqobjectsample = 2, penalty = 0.5,
   ptop = 4.3, pbottom = 1.8, prows = 250)
 sqms <- squaremodelsummary(copyNumbersSegmented, 2, squaremodel = sqm, printplots = FALSE)
 sqms[[1]]
-sqms[[2]] + ggtitle("Top fit for sample2")
+sqms[[2]] + ggplot2::ggtitle("Top fit for sample2")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

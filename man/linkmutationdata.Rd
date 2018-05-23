@@ -27,9 +27,7 @@ The formula that calculates mutant copies only works if the variant is not prese
 \value{
 Prints output to a tab-delimited file, or returns a data frame with columns added for copies and mutant copies.
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }
@@ -43,9 +41,16 @@ Make sure the mutation data matches with the genome build used for alignment / b
 \code{\link{getadjustedsegments}}, \code{\link{analyzegenomiclocations}}, \code{\link{postanalysisloop}}
 }
 \examples{
-## see the vignette for examples
+## using manually simulated mutation data
+## see vignette for more practical uses
+data("copyNumbersSegmented")
+segmentdf <- getadjustedsegments(copyNumbersSegmented, QDNAseqobjectsample = 2, cellularity = 0.38)
+Gene <- c("CASP8", "CDKN2A", "TP53")
+Chromosome <- c(2, 9, 17)
+Position <- c(202149589, 21971186, 7574003)
+Frequency <- c(47.46, 36.28, 43.48)
+mutationdf <- data.frame(Gene, Chromosome, Position, Frequency)
+linkmutationdata(mutationdf, segmentdf, cellularity = 0.38, 
+                 chrindex = 2, posindex = 3, freqindex = 4)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

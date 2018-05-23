@@ -31,6 +31,8 @@ postanalysisloop(copyNumbersSegmented, modelsfile, mutationdata, prefix = "", po
   \item{printnewplots}{Logical. When TRUE, prints plots into a "newplots" folder in the specified image type. Default = TRUE}
   \item{imagetype}{Character string specifying the image type graphics device. Default = "pdf"}
   \item{outputdir}{Character string. Save output into this custom directory. Default = "./"}
+  \item{log}{Logical or integer. Use log conversion for creating segments output. Default = FALSE}
+  \item{segext}{Character string specifying the extension for the segments output. Default = "tsv"}
 }
 \details{
 If your input is tailored for this function, you could run it without any arguments! Most arguments help with matching sample names in the QDNAseq-object, the modelsfile, and the name of the file containing mutation data. You can "trim" the name of the file with mutation data using the \code{prefix} (everything before the name) and \code{postfix} (everything after the name, but before the file extension) arguments. \code{trncname} migth help trimming the name in the QDNAseq-object, but be sure it still matches the sample names in the modelsfile (and mutation data file names when applicable). 
@@ -38,9 +40,7 @@ If your input is tailored for this function, you could run it without any argume
 \value{
 Prints the specified output to an indicated directory
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }

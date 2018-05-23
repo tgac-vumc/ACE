@@ -26,9 +26,7 @@ templatefromequalsegments(template, QDNAseqobjectsample = FALSE, equalsegments =
 \value{
 Returns a template data frame
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
+
 \author{
 Jos B. Poell
 }
@@ -36,14 +34,12 @@ Jos B. Poell
 The chrsubset argument works slightly differently compared to the plotting functions. It does not necessarily segment only contiguous chromosomes. For instance, specifying chrsubset = c(8,12) will only resegment chromosomes 8 and 12. For the other chromosomes, segment values will not be changed.  
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
 \code{\link{twosamplecompare}}, \code{\link{correlationmatrixadjusted}}
 }
+
 \examples{
+data("copyNumbersSegmented")
+tfes <- templatefromequalsegments(copyNumbersSegmented, QDNAseqobjectsample = 2)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+
