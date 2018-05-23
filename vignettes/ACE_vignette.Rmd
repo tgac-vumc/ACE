@@ -2,7 +2,7 @@
 title: "ACE vignette"
 author: "Jos B. Poell"
 date: "`r Sys.Date()`"
-output: BiocStyle::pdf_document
+output: BiocStyle::html_document
 vignette: >
   %\VignetteIndexEntry{ACE vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -30,13 +30,6 @@ You want pretty copy number profiles of your samples.
 You want to know how many copies are present of a certain chromosomal segment, or even gene, or mutation!
 
 
-## Why not use ACE?
-
-You only need a copy number profile, not a tumor cell percentage or absolute copy estimation.
-You don't have NGS data, or you don't have equal(ish) whole genome coverage.
-You prefer one of the difficult to use, difficult to interpret alternatives.
-
-
 ## How ACE works
 
 ACE is a an absolute copy number estimator that scales copy number data to fit with integer copy numbers. For this it uses segmented data from the QDNAseq package, which in turn uses a number of dependencies. Note: make sure QDNAseq fetches the bin annotations from the same genome build as the one used for aligning the sequencing data! On with ACE! In brief: ACE will run QDNAseq or use its output rds-file(s) of segmented data. It will subsequently run through all samples in the object(s), for which it will create individual subdirectories. For each sample, it will calculate how well the segments fit (the relative error) to integer copy numbers for each percentage of "tumor cells" (cells with divergent segments). Note that it does not estimate for a lower percentage than 5. ACE will output a graph with relative errors (all errors relative to the largest error). Said graph can be used to quickly identify the most likely fit. ACE selects all "minima" and saves the corresponding copy number plots. The "best fit" (lowest error) is not by definition the most likely fit! ACE will run models for a general tumor ploidy of 2N, but you can expand this to include any ploidy of your choosing. The program needs to make one assumption: the median bin segment value corresponds with the tumor's general ploidy. If the median bin segment value of a sample (the "standard") lies on a segment that happens to be 3N, but you only ran ACE on 2N, you can run that sample individually using the singlemodel function with argument ploidy = 3 (see section "examining single samples"). If the standard happens to be on a subclonal segment, you either have to manually change the standard, or use the squaremodel function (again, see below). The output of ACE is designed in such a way that it is "easy" to quickly analyze multiple samples. Bear in mind that it is absolutely necessary to manually select the most likely models! I have made a conscious decision not to let ACE "autopick" the best model. See below for a manual how to most efficiently pick the most likely models from your output. Let's get started!
@@ -46,7 +39,7 @@ ACE is a an absolute copy number estimator that scales copy number data to fit w
 
 ## Getting started
 
-The ACE package includes segmented data is derived from low-coverage whole genome sequencing, which will be used throughout this vignette. The mapped sequencing data has been processed through the QDNAseq package. Users of ACE, however, are most likely to start from their own bam-files, not the pre-processed segmented data. runACE, the core functionality of ACE, will run a default set of QDNAseq functions if bam-files are provided as the data source (make sure the genome builds correspond, I cannot stress this enough). If you wish to run the code below, make sure the file paths are correct. To get started, I recommend using a directory that only contains a few bam-files. The function runACE is designed to automatically analyze all samples in a directory. Input should be either segmented QDNAseq-objects or aligned bam-files. For details on all arguments, consult the runACE documentation. Let's get started! 
+The ACE package includes segmented data derived from low-coverage whole genome sequencing, which will be used throughout this vignette. The mapped sequencing data has been processed through the QDNAseq package. Users of ACE, however, are most likely to start from their own bam-files, not the pre-processed segmented data. runACE, the core functionality of ACE, will run a default set of QDNAseq functions if bam-files are provided as the data source (make sure the genome builds correspond, I cannot stress this enough). If you wish to run the code below, make sure the file paths are correct. To get started, I recommend using a directory that only contains a few bam-files. The function runACE is designed to automatically analyze all samples in a directory. Input should be either segmented QDNAseq-objects or aligned bam-files. For details on all arguments, consult the runACE documentation. Let's get started! 
 
 ```{r, eval = FALSE}
 userpath <- "D:/DATA/bam-files"
@@ -93,15 +86,15 @@ This tab-delimited file can be used during selection of most likely models. Espe
 ## Model selection
 
 Having this massive pile of output can be daunting, how do you make sense of it all?
-First of all, if you have multiple bin sizes, you generally only need a single bin size for your model selection. I recommend using a relatively large bin size. File sizes are smaller and segmentation is often more robust. You can probably find the corresponding model in the smaller binsizes as well, if you prefer to use those for copy number graphs. Cellularities between corresponding models made with different bin sizes are usually very similar, but some fits may be "missed". The most likely fit of a tumor is generally 1) the fit with the smallest error, or 2) the fit at the highest cellularity, so those two are presented in the summary_likelyfits file. When you open this file, you see for each sample three plots in a row (in case of imagetype='pdf', it will make a new page from each plot). The first two of the three are copy number plots of the best fit (lowest relative error) and the last minimum, respectively. The third plot is the error list, which shows the relative error of the fit at each tested "cellularity" (tumor cell percentage). In most cases you will be able to pick a good fit from these graphs. The individual graph is then available in the likelyfits subdirectory. If none of the models fit well, or you think there might be a better fit possible, you can look at all fits in the summary file, available in the subdirectory of that sample. If there are still no good fits (e.g. the tumor has a ploidy of 3N), you have to do model fitting on this sample separately (see below).
+First of all, if you have multiple bin sizes, you generally only need a single bin size for your model selection. I recommend using a relatively large bin size. File sizes are smaller and segmentation is often more robust. You can probably find the corresponding model in the smaller binsizes as well, if you prefer to use those for copy number graphs. Cellularities between corresponding models made with different bin sizes are usually very similar, but some fits may be "missed". The most likely fit of a tumor is generally 1) the fit with the smallest error, or 2) the fit at the highest cellularity, so those two are presented in the summary_likelyfits file. When you open this file, you see for each sample three plots in a row (in case of imagetype = 'pdf', it will make a new page from each plot). The first two of the three are copy number plots of the best fit (lowest relative error) and the last minimum, respectively. The third plot is the error list, which shows the relative error of the fit at each tested "cellularity" (tumor cell percentage). In most cases you will be able to pick a good fit from these graphs. The individual graph is then available in the likelyfits subdirectory. If none of the models fit well, or you think there might be a better fit possible, you can look at all fits in the summary file, available in the subdirectory of that sample. If there are still no good fits (e.g. the tumor has a ploidy of 3N and you did not include this ploidy), you have to do model fitting on this sample separately (see below).
 
 You might want to go through your samples a bit more systematically, especially if you have many samples. You can open the fitpicker.tsv file, go through the fits of the summary file and note in the likely_fit column of the picker table which fit you chose. Just leave open any samples of which you are not sure. The handy thing about the fitpicker files is that they have the list of your sample names and they have the list of cellularities. 
 
 Another feature that might help going through a lot of samples, is using the "penalty" parameter in the runACE call. This parameter penalizes fits at lower cellularities. Doing so greatly improves the chance that the best fit is also the most likely fit, but comes at the cost of precision at high cellularities and comes at the cost of sensitivity at low cellularities (but only at the lowest end of the spectrum, let's say below 10%). More about this later.
 
-In the two examples given, it is quite obvious what the most likely appropriate models are: for sample 1 it is the "lastminimum" with a general ploidy of 2N and cellularity of 0.79, and for sample 2 it is the "bestfit" with a general ploidy of 2N and cellularity of 0.38. Examining the error plots of these samples draws a great picture of how obvious the right model can be for the trained eye, while it can be deceivingly tricky to rely on a simple computer algorithm to make the pick.
+In the two examples given below, it is quite obvious what the most likely appropriate models are: for sample 1 it is the "lastminimum" with a general ploidy of 2N and cellularity of 0.79, and for sample 2 it is the "bestfit" with a general ploidy of 2N and cellularity of 0.38. Examining the error plots of these samples draws a great picture of how obvious the right model can be for the trained eye, while it can be deceivingly tricky to rely on a simple computer algorithm to make the pick.
 
-To reproduce some of the output created by ACE (which is only written to file), I have included the following code. The functions used will be explained in more detail later:
+To reproduce some of the output created by runACE (which is only written to file), I have included the following code. The functions used will be explained in more detail later:
 
 ```{r, fig.show='hold'}
 data("copyNumbersSegmented")
@@ -148,20 +141,17 @@ object <- copyNumbersSegmented
 # Since you're convinced the mode is 3N, you can run the singlemodel function to
 # fit at ploidy = 3
 model <- singlemodel(object, QDNAseqobjectsample = 2, ploidy = 3)
-model
-# Quickly plotting the errors can give you a feel for the fits. Experience tells
+ls(model)
+model$minima
+model$rerror
+model$errorplot
+# Examining the errors can give you a feel for the fits. Experience tells
 # us the last fit is probably the right one, so let's check out the copy number 
 # plot. Specify the same parameters, now including the cellularity derived from 
 # the model.
 singleplot(object, QDNAseqobjectsample = 2, cellularity = 0.46, ploidy = 3)
 # That is actually a very nice fit, let's run with it!
 # You can now save the plot however you like. 
-# Similarly, you can see what happens if the mode of the tumor is 1N
-model <- singlemodel(object, ploidy = 1, QDNAseqobjectsample = 2)
-model
-singleplot(object, QDNAseqobjectsample = 2, cellularity = 0.32, ploidy = 1)
-# Also seems possible, right?! Now if you have mutation data, perhaps you can
-# tease out which one is true!
 ```
 
 Model fitting as performed by singlemodel, but also runACE, starts with setting the median segment value of a sample to the specified integer ploidy (default = 2). This usually works very well, but in some cases the median segment value may lie on a subclonal segment. Using the argument "standard" you can specify the segment value that should correspond with the ploidy.
@@ -187,12 +177,14 @@ plot(rep(segmentdata$values, segmentdata$lengths))
 # that number as new standard. First we need to find a good model that fits with
 # this hypothesis
 model <- singlemodel(template, ploidy = 2, standard = 0.8105095)
-model
+data.frame(model$minima, model$rerror)
 singleplot(template, cellularity = 0.46, ploidy = 2, standard = 0.8105095)
+# Choosing a lower standard shifts the absolute copy numbers up
+# As a result we ended up with the exact same model as the 3N fit
 # Note that I can directly use the template for the singlemodel and singleplot functions
 ```
 
-Instead of tinkering with the standard and ploidy, you can also forget about the standard, and fit any possible ploidy to segment value 1. This is what the function squaremodel allows you to do. Instead of the boring error plots, you now get a colorful view of the relative error as a function of both ploidy and cellularity! Awesome! User beware though. You'll find ACE can make great fits at interesting ploidies, but they often don't make sense from a biological perspective. On top of the penalty for low cellularities, you can consider to use a penalty for ploidies (penploidy) that diverge a lot from two. All that trickiness urges me to advise against the use of this function as the primary means of finding fits. That, and the fact that the function takes more time to compute. Instead, use it to troubleshoot difficult samples or create visually appealing output to impress your colleagues. The function has some options to specify the range of ploidy (ptop and pbottom) and the resolution on the y-axis (prows).
+Instead of tinkering with the standard and ploidy, you can also forget about the standard, and fit any possible ploidy to segment value 1 (make sure your segmented data is normalized to 1). This is what the function squaremodel allows you to do. Instead of the boring error plots, you now get a colorful view of the relative error as a function of both ploidy and cellularity! Awesome! User beware though. You'll find ACE can make great fits at interesting ploidies, but they often don't make sense from a biological perspective. On top of the penalty for low cellularities, you can consider to use a penalty for ploidies (penploidy) that diverge a lot from two. All that trickiness urges me to advise against the use of this function as the primary means of finding fits. That, and the fact that the function takes more time to compute. Instead, use it to troubleshoot difficult samples or create visually appealing output to impress your colleagues. The function has some options to specify the range of ploidy (ptop and pbottom) and the resolution on the y-axis (prows).
 
 ```{r}
 # Let's continue with the template we made for sample 2, and just see what happens...
@@ -210,15 +202,17 @@ head(sqmodel$minimadf, 10)
 # Guess I was warned about this ... squaremodel is a bit fithappy; time to put
 # the thumbscrews on the fit
 squaremodel(template, penalty = 0.5, penploidy = 0.5)$matrixplot
-# Much better. Additionally you can mess with the range and resolution a bit
+# Much better. Additionally you can play around with the range and resolution
 sqmodel <- squaremodel(template, prows = 150, ptop = 3.3, pbottom = 1.8, 
                        penalty = 0.5, penploidy = 0.5)
+sqmodel$matrixplot
 # Going for higher ploidy resolution is not recommended! Not only will it take
 # much longer to run, it will start distinguishing minima that correspond with
 # basically the same model.
-sqmodel$matrixplot
 head(sqmodel$minimadf, 10)
 singleplot(template, cellularity = 0.41, ploidy = 2.08, standard = 1)
+# Perhaps this fit is a little bit better than our original 2N fit, 
+# but the difference is negligible.
 # Don't forget: standard for squaremodel is by definition 1, but you have to
 # specify this in the singleplot function call!
 ```
