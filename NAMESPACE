@@ -4,34 +4,17 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 importClassesFrom(Biobase, AnnotatedDataFrame, AssayData, eSet, MIAxE,
     Versioned, VersionedBiobase, Versions)
-importClassesFrom(CGHbase, cghCall, cghRaw, cghSeg)
-importClassesFrom(methods, character, logical, matrix, missing, numeric)
 importClassesFrom(QDNAseq, QDNAseqCopyNumbers, QDNAseqReadCounts)
 
 importMethodsFrom(Biobase, AnnotatedDataFrame, assayData, classVersion, fData,
     "fData<-", featureData, featureNames, pData, "pData<-", phenoData,
     sampleNames, "sampleNames<-", varMetadata)
-importMethodsFrom(CGHbase, bpend, bpstart, calls, "calls<-", chromosomes,
-    copynumber, "copynumber<-", frequencyPlot, plot, probamp, "probamp<-",
-    probdloss, "probdloss<-", probgain, "probgain<-", probloss, "probloss<-",
-    probnorm, "probnorm<-", segmented, "segmented<-", "regions", "regions<-")
-importMethodsFrom(methods, coerce, initialize, show)
-importMethodsFrom(Rsamtools, scanBam, ScanBamParam, scanBamHeader)
 
 importFrom(Biobase, assayDataElement, "assayDataElement<-",
     assayDataElementNames, assayDataElementReplace, assayDataNew, sampleNames)
-importFrom(CGHcall, CGHcall, ExpandCGHcall, postsegnormalize)
-importFrom(DNAcopy, CNA, segment, smooth.CNA, segments.summary)
-importFrom(graphics, abline, axis, axTicks, box, contour, image, mtext, par,
-    points, rect, segments, text)
-importFrom(matrixStats, binCounts, madDiff, sdDiff, rowMedians, colMedians)
-importFrom(methods, callNextMethod, new)
-importFrom(R.utils, downloadFile)
-importFrom(Rsamtools, scanBamFlag)
-importFrom(stats, aggregate, approxfun, density, formula, lm, loess, median, predict)
-importFrom(utils, data, maintainer, packageVersion, read.table, write.table)
-importFrom(GenomicRanges, GRanges)
-importFrom(IRanges, IRanges)
+importFrom(stats, sd, cor, t.test, wilcox.test, median, mad, pnorm, rnorm, p.adjust, na.exclude)
+importFrom(utils, data, maintainer, packageVersion, read.table, write.table, tail)
+importFrom(grDevices, dev.off, pdf, png)
 
 import(ggplot2)
 
