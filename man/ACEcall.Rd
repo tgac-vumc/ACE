@@ -8,13 +8,14 @@ Categorize and plot subclonal, single, and double gains / losses
 ACEcall is the calling algorithm for ACE that utilizes the absolute copy number scaling to distinguish subclonal, single, and double losses and gains. For a segment to be "called", its segment mean needs to deviate from the general tumor ploidy both based on statistical significance and a large enough difference (both parameters can be set by the user). 
 }
 \usage{
-ACEcall(template, QDNAseqobjectsample = FALSE, cellularity = 1, ploidy = 2, standard, 
-        plot = TRUE, title, pcutoff, qcutoff = -3, subcutoff = 0.2, 
-        trncname = FALSE, cap = 12, bottom = 0, chrsubset, onlyautosomes = TRUE)
+ACEcall(template, QDNAseqobjectsample = FALSE, cellularity = 1, 
+        ploidy = 2, standard, plot = TRUE, title, pcutoff, 
+        qcutoff = -3, subcutoff = 0.2, trncname = FALSE, 
+        cap = 12, bottom = 0, chrsubset, onlyautosomes = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{template}{Object. Either a template data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
+  \item{template}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
   \item{QDNAseqobjectsample}{Integer. Specifies which sample to analyze from the QDNAseq-object. Required when using a QDNAseq-object as template. Default = FALSE}
   \item{cellularity}{Numeric. Used for rescaling bin and segment values. Printed on graph. Default = 1}
   \item{ploidy}{Integer. Assume the median of segments has this absolute copy number. Default = 2}
@@ -71,7 +72,9 @@ template <- data.frame(bin = bin, chr = chr, start = start, end = end,
 ACEcall(template, cellularity = 0.4, title = "sim")
 ## using segmented data from a QDNAseq-object
 data("copyNumbersSegmented")
-## for derivations of the parameters for this fit, see documentation on squaremodel
-ACEcall(copyNumbersSegmented, QDNAseqobjectsample = 2, cellularity = 0.41, ploidy = 2.08, standard = 1)
+## for derivations of the parameters for this fit, 
+## see documentation on squaremodel
+ACEcall(copyNumbersSegmented, QDNAseqobjectsample = 2, 
+  cellularity = 0.41, ploidy = 2.08, standard = 1)
 }
 

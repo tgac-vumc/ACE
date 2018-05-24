@@ -8,8 +8,8 @@ Create a template data frame from input that only provides segment information
 \code{segmentstotemplate} "explodes" segment data and creates a data frame with information for all bins. This enables the use of data limited to segments in ACE-related functions. 
 }
 \usage{
-segmentstotemplate(segmentdf, chrci = 1, startci = 2, endci = 3, binsci = 4, 
-                   meanci = 5, seci, sdci, log = FALSE)
+segmentstotemplate(segmentdf, chrci = 1, startci = 2, endci = 3, 
+  binsci = 4, meanci = 5, seci, sdci, log = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

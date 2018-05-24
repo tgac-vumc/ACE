@@ -12,7 +12,7 @@ compresstemplate(template, factor = 20, funtype = "median")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{template}{Data frame. Template data frame such as created by \code{\link{objectsampletotemplate}}}
+  \item{template}{Data frame as created by \code{\link{objectsampletotemplate}}}
   \item{factor}{Integer. Number of bins to combine into a single bin. Default = 20}
   \item{funtype}{Character string. Specifies the function used to combine bins. Either "mean" or "median". Default = "median"}
 }

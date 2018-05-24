@@ -8,7 +8,9 @@ Append columns with total genomic copies and mutant copies to a file with mutati
 \code{linkmutationdata} combines copy number data, estimated tumor cell percentage, and variant allele frequency (e.g. mutation data) to calculate how many variant (mutant) copies the tumor genome harbors. It requires a tab-delimited file with mutation data and a data frame with adjusted segment data as obtained with \code{getadjustedsegments}. Also make sure to provide the correct (estimated) cellularity. Output is a file with "_ACE" added to the original file name before the extension. It can either be a copy of the input with Copynumbers and Mutant_copies appended as extra columns at the end, or a file with the columns Chromosome, Position, Frequency, Copynumbers and Mutant_copies. To perform batch analysis, use \code{\link{postanalysisloop}}.
 }
 \usage{
-linkmutationdata(mutationdf, segmentdf, cellularity = 1, chrindex = 1, posindex = 2, freqindex = 3, append = TRUE, outputdir)
+linkmutationdata(mutationdf, segmentdf, cellularity = 1, 
+                 chrindex = 1, posindex = 2, freqindex = 3, 
+                 append = TRUE, outputdir)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -44,7 +46,8 @@ Make sure the mutation data matches with the genome build used for alignment / b
 ## using manually simulated mutation data
 ## see vignette for more practical uses
 data("copyNumbersSegmented")
-segmentdf <- getadjustedsegments(copyNumbersSegmented, QDNAseqobjectsample = 2, cellularity = 0.38)
+segmentdf <- getadjustedsegments(copyNumbersSegmented, 
+  QDNAseqobjectsample = 2, cellularity = 0.38)
 Gene <- c("CASP8", "CDKN2A", "TP53")
 Chromosome <- c(2, 9, 17)
 Position <- c(202149589, 21971186, 7574003)

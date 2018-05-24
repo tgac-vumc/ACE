@@ -5,11 +5,7 @@
 Converts data of a sample in a QDNAseq-object to a template for ACE functions
 }
 \description{
-\code{objectsampletotemplate} parses QDNAseq-objects into the dataframe structure used 
-by the \code{\link{singlemodel}}, \code{\link{squaremodel}}, and \code{\link{singleplot}} functions. 
-These functions call \code{objectsampletotemplate} itself when necessary, but it might be convenient 
-to make a template if you expect some repeated use of the functions or if you 
-want to make manual adjustments to the template.
+\code{objectsampletotemplate} parses QDNAseq-objects into the data frame structure used by various ACE functions. These functions call objectsampletotemplate itself when necessary, but it might be convenient to make a template if you expect some repeated use of the functions or if you want to make manual adjustments to the template.
 }
 \usage{
 objectsampletotemplate(copyNumbersSegmented, index = 1)

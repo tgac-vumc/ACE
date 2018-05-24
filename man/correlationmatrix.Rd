@@ -10,7 +10,8 @@ Create a correlation matrix of all samples in a QDNAseq-object
 \usage{
 correlationmatrix(object, trncname = FALSE)
 
-correlationmatrixadjusted(object, trncname = FALSE, equalsegments = FALSE, funtype = 'mean')
+correlationmatrixadjusted(object, trncname = FALSE, 
+  equalsegments = FALSE, funtype = 'mean')
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

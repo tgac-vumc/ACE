@@ -8,11 +8,13 @@ Plot an absolute copy number profile for a single sample
 \code{singleplot} is the core plotting function of ACE. Input can be either a template or a QDNAseq-object with the index of the sample specified. Several of the arguments are parameters obtained from model fitting. Returns a \code{ggplot2} graph with absolute copies on the y-axis and genomic position on the x-axis. 
 }
 \usage{
-singleplot(template, QDNAseqobjectsample = FALSE, cellularity = 1, error, ploidy = 2, standard, 
-           title, trncname = FALSE, cap = 12, bottom = 0, chrsubset, onlyautosomes = TRUE)
+singleplot(template, QDNAseqobjectsample = FALSE, 
+  cellularity = 1, error, ploidy = 2, standard, title, 
+  trncname = FALSE, cap = 12, bottom = 0, chrsubset, 
+  onlyautosomes = TRUE)
 }
 \arguments{
-  \item{template}{Object. Either a template data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
+  \item{template}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
   \item{QDNAseqobjectsample}{Integer. Specifies which sample to analyze from the QDNAseq-object. Required when using a QDNAseq-object as template. Default = FALSE}
   \item{cellularity}{Numeric. Used for rescaling bin and segment values. Printed on graph. Default = 1}
   \item{error}{Numeric. When given, it is printed on the graph below cellularity.}
@@ -60,10 +62,11 @@ singleplot(template, cellularity = tail(bestfit, 1), title = "sim")
 ## using segmented data from a QDNAseq-object
 data("copyNumbersSegmented")
 singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 1)
-singleplot(copyNumbersSegmented, QDNAseqobjectsample = 1, cellularity = 0.79)
-## QDNAseq output 'blacklists' sex chromosomes, but singleplot can plot them
-singleplot(copyNumbersSegmented, QDNAseqobjectsample = 1, cellularity = 0.79,
-  chrsubset = 12:24, onlyautosomes = FALSE)
+singleplot(copyNumbersSegmented, QDNAseqobjectsample = 1, 
+  cellularity = 0.79)
+## QDNAseq 'blacklists' sex chromosomes, but singleplot can plot them
+singleplot(copyNumbersSegmented, QDNAseqobjectsample = 1, 
+  cellularity = 0.79, chrsubset = 12:24, onlyautosomes = FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

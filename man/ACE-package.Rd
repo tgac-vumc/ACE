@@ -9,7 +9,7 @@ ACE is developed to analyze (low-coverage) whole genome sequencing data, infer a
 }
 
 \section{Details}{
-ACE basically starts from segmented copy number data. To arrive at this point from mapped sequencing reads, it runs a set of default QDNAseq functions to obtain segmented \code{\link[QDNAseq]{QDNAseqCopyNumbers}} objects. For copy number plots, ACE uses \code{\link[ggplot2:ggplot2-package]{ggplot2}}. The following functions comprise the main functionality of ACE:
+ACE basically starts from segmented copy number data. To arrive at this point from mapped sequencing reads, it runs a set of default QDNAseq functions to obtain \code{\link[QDNAseq]{QDNAseqCopyNumbers}} objects with segmented data. For copy number plots, ACE uses \code{\link[ggplot2:ggplot2-package]{ggplot2}}. The following functions comprise the main functionality of ACE:
 \describe{
 \item{\code{\link{runACE}}}{Perform model fitting on all samples in a directory}
 \item{\code{\link{singlemodel}}}{Perform model fitting on a single sample}

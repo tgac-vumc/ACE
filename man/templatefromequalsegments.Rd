@@ -8,12 +8,13 @@
 Divide chromosomes in artificial segments with the specified number of bins. You can provide a template without segment values (for instance, an unsegmented QDNAseq-object) as input for this function. You can also use this function to only resegment a subset of chromosomes.
 }
 \usage{
-templatefromequalsegments(template, QDNAseqobjectsample = FALSE, equalsegments = 20, funtype = 'mean', 
-  chrsubset, onlyautosomes = TRUE)
+templatefromequalsegments(template, QDNAseqobjectsample = FALSE, 
+  equalsegments = 20, funtype = 'mean', chrsubset, 
+  onlyautosomes = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{template}{Object. Either a template data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
+  \item{template}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
   \item{QDNAseqobjectsample}{Integer. Specifies which sample to analyze from the QDNAseqobject. Required when using a QDNAseq-object as template. Default = FALSE}
   \item{equalsegments}{Integer. \code{templatefromequalsegments} "resegments" simply by creating segments containing as many bins as specified in this argument. Default = 20}
   \item{funtype}{Character string. Specifies the function used to calculate new segment values. Alternative is "median". Default = "mean"}
@@ -40,6 +41,7 @@ The chrsubset argument works slightly differently compared to the plotting funct
 
 \examples{
 data("copyNumbersSegmented")
-tfes <- templatefromequalsegments(copyNumbersSegmented, QDNAseqobjectsample = 2)
+tfes <- templatefromequalsegments(copyNumbersSegmented, 
+  QDNAseqobjectsample = 2)
 }
 

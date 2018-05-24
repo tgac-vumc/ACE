@@ -14,7 +14,7 @@ A QDNAseq-object with segmented copy number data of two tumor samples:
   represented by copy number values and segment values of two samples
   \describe{
     \item{\code{copyNumbersSegmented@assayData$copynumber}}{copy number data saved in a matrix, rownames are bins (chr:start-end), colnames are sampleNames}
-    \item{\code{copyNumbersSegmented@assayData$segmented}}{segment values saved in a matrix, rownames are bins (chr:start-end), colnames are sampleNames}
+    \item{\code{copyNumbersSegmented@assayData$segmented}}{segment values saved in a matrix, the rownames are bins (chr:start-end), colnames are sampleNames}
   }
 }
 
@@ -28,6 +28,7 @@ data("copyNumbersSegmented")
 singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 1)
 singleplot(copyNumbersSegmented, 1, cellularity = 0.79)
 model2 <- singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 2)
-singleplot(copyNumbersSegmented, 2, cellularity = with(model2, minima[which(rerror==min(rerror))]))
+singleplot(copyNumbersSegmented, 2, cellularity = with(model2, 
+  minima[which(rerror==min(rerror))]))
 }
 \keyword{datasets}

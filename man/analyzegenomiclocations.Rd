@@ -8,7 +8,8 @@ Retrieve adjusted copy number information for specific genomic locations
 \code{analyzegenomiclocations} searches an adjusted segment data frame for the specified genomic locations and reports the associated segment mean as "Copynumbers". If frequency of a variant is given (in percentage), mutant copies are also calculated. Make sure the specified cellularity is the same number as was used to create the adjusted segment data frame.
 }
 \usage{
-analyzegenomiclocations(segmentdf, Chromosome, Position, Frequency, cellularity)
+analyzegenomiclocations(segmentdf, Chromosome, Position, 
+                        Frequency, cellularity)
 }
 
 \arguments{
@@ -40,9 +41,11 @@ Chromosome, Position, and Frequency can be single values or vectors. In the latt
 \examples{
 ## using segmented data from a QDNAseq-object
 data("copyNumbersSegmented")
-segmentdf <- getadjustedsegments(copyNumbersSegmented, QDNAseqobjectsample = 2, cellularity = 0.39)
+segmentdf <- getadjustedsegments(copyNumbersSegmented, 
+  QDNAseqobjectsample = 2, cellularity = 0.39)
 analyzegenomiclocations(segmentdf, Chromosome = 5, Position = 26365569)
-analyzegenomiclocations(segmentdf, Chromosome = 5, Position = 26365569, Frequency = 25, cellularity = 0.39)
+analyzegenomiclocations(segmentdf, Chromosome = 5, Position = 26365569, 
+  Frequency = 25, cellularity = 0.39)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

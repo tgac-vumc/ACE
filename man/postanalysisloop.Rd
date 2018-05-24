@@ -8,10 +8,12 @@ Batch analysis of samples in a QDNAseq-object for which models have been chosen
 When models have been chosen for all (or just multiple) samples in a QDNAseq-object, this function can be used to perform a batch analysis on those samples. This encompasses printing segment data, printing copy number plots, and linking mutation data. 
 }
 \usage{
-postanalysisloop(copyNumbersSegmented, modelsfile, mutationdata, prefix = "", postfix = "", trncname = FALSE,
-                 inputdir = FALSE, chrindex = 1, posindex = 2, freqindex = 3, append = TRUE, dontmatchnames = FALSE,
-                 printsegmentfiles = TRUE, printnewplots = TRUE, imagetype = 'pdf', outputdir = "./", log = FALSE, 
-                 segext = 'tsv')
+postanalysisloop(copyNumbersSegmented, modelsfile, mutationdata, 
+  prefix = "", postfix = "", trncname = FALSE, inputdir = FALSE, 
+  chrindex = 1, posindex = 2, freqindex = 3, append = TRUE, 
+  dontmatchnames = FALSE, printsegmentfiles = TRUE, 
+  printnewplots = TRUE, imagetype = 'pdf', outputdir = "./", 
+  log = FALSE, segext = 'tsv')
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -51,13 +53,14 @@ The use of \code{inputdir} and \code{outputdir} should be fairly robust. However
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{getadjustedsegments}}, \code{\link{analyzegenomiclocations}}, \code{\link{linkmutationdata}}, \code{\link{runACE}}
+\code{\link{getadjustedsegments}}, \code{\link{linkmutationdata}}, \code{\link{runACE}}
 }
 \examples{
 ## see the vignette for examples
 \dontrun{
   data("copyNumbersSegmented")
-  postanalysisloop(copyNumbersSegmented, "models.tsv", "mutationdata", outputdir = "loop_output")
+  postanalysisloop(copyNumbersSegmented, "models.tsv", "mutationdata", 
+  outputdir = "loop_output")
   }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

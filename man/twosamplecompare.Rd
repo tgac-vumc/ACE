@@ -8,21 +8,22 @@ Overlay copy number data of two samples and compare segment values
 \code{twosamplecompare} "resegments" two samples to have the same breakpoints. Both samples' means of the resulting segments are tested for equality using the two-sided Welch two sample t-test. \code{twosamplecompare} returns a data frame with the comparisons per segment, it returns the correlation of segments, and a copy number plot with an overlay of (scaled) segment values of both samples and the associated -log10-transformed q-values. 
 }
 \usage{
-twosamplecompare(template1, index1 = FALSE, ploidy1 = 2, cellularity1 = 1, standard1, name1,
-                 template2, index2 = FALSE, ploidy2 = 2, cellularity2 = 1, standard2, name2,
-                 equalsegments = FALSE, altmethod = FALSE, cap = 12, qcap = 12, bottom = 0,
-                 plot = TRUE, trncname = FALSE, legend = TRUE, chrsubset, onlyautosomes = TRUE,
-                 showcorrelation = TRUE)
+twosamplecompare(template1, index1 = FALSE, ploidy1 = 2,
+  cellularity1 = 1, standard1, name1, template2, index2 = FALSE, 
+  ploidy2 = 2, cellularity2 = 1, standard2, name2,
+  equalsegments = FALSE, altmethod = FALSE, cap = 12, qcap = 12, 
+  bottom = 0, plot = TRUE, trncname = FALSE, legend = TRUE, 
+  chrsubset, onlyautosomes = TRUE, showcorrelation = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{template1}{Object. Either a template data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
+  \item{template1}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
   \item{index1}{Integer. If template1 is a QDNAseqobject, this specifies the index of the first sample. Default = FALSE}
   \item{ploidy1}{Integer. Assume the median of segments of the first sample has this absolute copy number. Default = 2}
   \item{cellularity1}{Numeric. Used for rescaling bin and segment values of the first sample. Default = 1}
   \item{standard1}{Numeric. Forces ploidy1 to represent this raw value. When omitted, the standard will be calculated from the data. When using parameters obtained from \code{squaremodel}, specify standard1 = 1}
   \item{name1}{Character string. Name of the first sample. Printed on graph}
-  \item{template2}{Object. Either a template data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object. When omitted, template1 will be used}
+  \item{template2}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object. When omitted, template1 will be used}
   \item{index2}{Integer. Specifies the index of the second sample in template2 or, when template2 is omitted, in template1. Default = FALSE}
   \item{ploidy2}{Integer. Assume the median of segments of the second sample has this absolute copy number. Default = 2}
   \item{cellularity2}{Numeric. Used for rescaling bin and segment values of the second sample. Default = 1}
@@ -56,7 +57,7 @@ This function can be used for different types of comparisons. It can be used to 
 Jos B. Poell
 }
 \note{
-The dataframe returned by this function always contains all segments, even when the argument chrsubset is used. However, if there is no useful data for an entire chromosome, it will not constitute a segment and thus be excluded from the data frame, even though the chromsome may be included in the plot. If you want to know the correlation of segments of a subset of chromosomes, you need to have the argument plot = TRUE, because this particular correlation number is calculated in the plot loop. If you do not want to render the plot, you can follow the closing parenthesis of the function call with $subsetcorrelation. If you want to get rid of the green significance bars in the plot, you can set qcap = 0. If you insist on getting rid of the entire secondary axis, save the plot to an object, then run: \code{plotobject + scale_y_continuous(name = "copies", sec.axis = sec_axis(~., labels = NULL), expand = c(0,0))}
+The dataframe returned by this function always contains all segments, even when the argument chrsubset is used. However, if there is no useful data for an entire chromosome, it will not constitute a segment and thus be excluded from the data frame, even though the chromsome may be included in the plot. If you want to know the correlation of segments of a subset of chromosomes, you need to have the argument plot = TRUE, because this particular correlation number is calculated in the plot loop. If you do not want to render the plot, you can follow the closing parenthesis of the function call with $subsetcorrelation. If you want to get rid of the green significance bars in the plot, you can set qcap = 0. If you insist on getting rid of the entire secondary axis, save the plot to an object, then run: plotobject + scale_y_continuous(name = "copies", sec.axis = sec_axis(~., labels = NULL), expand = c(0,0))
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -88,9 +89,10 @@ twosamplecompare(template1 = template1, template2 = template2,
   cellularity1 = 0.4, cellularity2 = 0.5, equalsegments = 20)
 ## using segmented data from a QDNAseq-object
 data("copyNumbersSegmented")
-## for derivations of the parameters for this fit, see documentation on squaremodel
-twosamplecompare(copyNumbersSegmented, index1 = 1, cellularity1 = 0.4, standard1 = 1,
-  index2 = 2, cellularity2 = 0.41, ploidy2 = 2.08, standard2 = 1)
+## for derivations of the parameters for this fit, see squaremodel
+twosamplecompare(copyNumbersSegmented, index1 = 1, cellularity1 = 0.4, 
+  standard1 = 1, index2 = 2, cellularity2 = 0.41, ploidy2 = 2.08, 
+  standard2 = 1)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

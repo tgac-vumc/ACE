@@ -13,13 +13,15 @@ Model fitting and production of all output files (except "parameters.tsv") is
 executed by \code{ploidyplotloop}, which handles one QDNAseq-object at a time. 
 }
 \usage{
-runACE(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies = 2,
-  imagetype = 'pdf', method = 'RMSE', penalty = 0, cap = 12, bottom = 0,
-  trncname = FALSE, printsummaries = TRUE, autopick = FALSE)
+runACE(inputdir = "./", outputdir, filetype = 'rds', binsizes, 
+  ploidies = 2, imagetype = 'pdf', method = 'RMSE', penalty = 0, 
+  cap = 12, bottom = 0, trncname = FALSE, printsummaries = TRUE, 
+  autopick = FALSE)
   
-ploidyplotloop(copyNumbersSegmented, currentdir, ploidies = 2, imagetype = 'pdf', 
-  method = 'RMSE', penalty = 0, cap = 12, bottom = 0, trncname = FALSE, 
-  printsummaries = TRUE, autopick = FALSE)
+ploidyplotloop(copyNumbersSegmented, currentdir, ploidies = 2, 
+  imagetype = 'pdf', method = 'RMSE', penalty = 0, cap = 12, 
+  bottom = 0, trncname = FALSE, printsummaries = TRUE, 
+  autopick = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -68,7 +70,8 @@ You can use the example data for testing: see Examples
 }
 \examples{
 \dontrun{
-  runACE("./bam/", outputdir = "./results", penalty = 0.5, imagetype = 'png')
+  runACE("./bam/", outputdir = "./results", penalty = 0.5, 
+    binsizes = c(100, 1000), imagetype = 'png')
   data("copyNumbersSegmented")
   ploidyplotloop(copyNumbersSegmented, ".", ploidies = c(2,3))
   }

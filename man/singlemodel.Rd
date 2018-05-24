@@ -8,12 +8,13 @@ Calculate potential fits for a single sample
 \code{singlemodel} performs the basic fitting algorithm of ACE on a single sample. Input can be either a template or a QDNAseq-object with the index of the sample specified. Returns a list with input parameters (ploidy, standard, and penalty) and model characteristics (calculated minima, the relative error corresponding with the minima, and the errors calculated at every cellularity). It also returns the plot associated with the error list. The minima represent cellularities, as can be seen in the plot.
 }
 \usage{
-singlemodel(template, QDNAseqobjectsample = FALSE, ploidy = 2, standard, 
-            method = 'RMSE', exclude = c(), penalty = 0, highlightminima = TRUE)
+singlemodel(template, QDNAseqobjectsample = FALSE, ploidy = 2, 
+            standard, method = 'RMSE', exclude = c(), 
+            penalty = 0, highlightminima = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{template}{Object. Either a template data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
+  \item{template}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
   \item{QDNAseqobjectsample}{Integer. Specifies which sample to analyze from the QDNAseqobject. Required when using a QDNAseq-object as template. Default = FALSE}
   \item{ploidy}{Integer. Calculate fits assuming the median of segments has this absolute copy number. Default = 2}
   \item{standard}{Numeric. Force the given ploidy to represent this raw value. When omitted, the standard will be calculated from the data}
@@ -42,7 +43,12 @@ Jos B. Poell
 }
 \note{
 singlemodel() only needs a data frame with columns named \code{chr} and \code{segments}. Every row should contain an individual genomic feature, i.e. a bin or a probe. If you have data with each row representing a segment, and the size of the segment given in a column (e.g. NumBins or NumProbes), you can create the data frame as follows (giving the correct variable names of course):
-\code{template <- data.frame(chr = rep(Chromosome, NumProbes), segments = rep(SegmentMean, NumProbes))}
+
+\code{chr <- rep(Chromosome, NumProbes)}
+
+\code{segments <- rep(SegmentMean, NumProbes)}
+
+\code{template <- cbind(chr, segments)}
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

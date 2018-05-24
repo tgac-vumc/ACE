@@ -52,8 +52,8 @@ In case of large numbers of samples, you may have to set \code{printobjectsummar
   data("copyNumbersSegmented")
   loopsquaremodel(copyNumbersSegmented, penalty = 0.5, penploidy = 0.5)
   }
-lsm <- loopsquaremodel(copyNumbersSegmented, printplots = FALSE, printobjectsummary = FALSE, 
-                       penalty = 0.5, penploidy = 0.5)
+lsm <- loopsquaremodel(copyNumbersSegmented, printplots = FALSE, 
+  printobjectsummary = FALSE, penalty = 0.5, penploidy = 0.5)
 ls(lsm[[1]])
 lsm[[1]]$samplename
 lsm[[1]]$matrixplot

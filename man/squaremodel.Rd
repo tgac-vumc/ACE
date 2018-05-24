@@ -8,12 +8,13 @@ Calculate potential fits for a single sample using ploidy as a variable
 \code{squaremodel} performs a "two-dimensional" fitting algorithm on a single sample. It calculates the error of the fit at each cellularity over a range of "ploidies".  Input can be either a template or a QDNAseq-object with the index of the sample specified. Returns a list with input parameters (method, penalty, and penploidy) and model characteristics (an error matrix, a logical matrix specifying minima, a data frame with all information, a data frame with only minima, and a graphical representation of the error matrix).
 }
 \usage{
-squaremodel(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5, pbottom=1, method = 'RMSE', 
-            exclude = c(), penalty = 0, penploidy = 0, highlightminima = TRUE)
+squaremodel(template, QDNAseqobjectsample = FALSE, prows=100, 
+  ptop=5, pbottom=1, method = 'RMSE', exclude = c(), 
+  penalty = 0, penploidy = 0, highlightminima = TRUE)
 }
 
 \arguments{
-  \item{template}{Object. Either a template data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
+  \item{template}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
   \item{QDNAseqobjectsample}{Integer. Specifies which sample to analyze from the QDNAseqobject. Required when using a QDNAseq-object as template. Default = FALSE}
   \item{prows}{Integer. Sets the resolution of the ploidy-axis. Determines how many decrements are used to get from ptop to pbottom (see below). Therefore, the actual number of rows is actually prows + 1. Default = 100}
   \item{ptop}{Numeric. Sets the highest ploidy at which to start testing fits. Default = 5}
@@ -44,8 +45,13 @@ Returns a list, containing
 Jos B. Poell
 }
 \note{
-squaremodel() only needs a data frame with columns named \code{chr} and \code{segments}. Every row should contain an individual genomic feature, i.e. a bin or a probe. If you have data with each row representing a segment, and the size of the segment given in a column (e.g. NumBins or NumProbes), you can create the data frame as follows (giving the correct variable names of course):
-\code{template <- data.frame(chr = rep(Chromosome, NumProbes), segments = rep(SegmentMean, NumProbes))}
+squaremodel() only needs a data frame with columns named \code{chr} and \code{segments}. Every row should contain an individual genomic feature, i.e. a bin or a probe. If you have data with each row representing a segment, and the size of the segment given in a column (e.g. NumBins or NumProbes), you can create the data frame as follows (giving the correct variable names of course): 
+
+\code{chr <- rep(Chromosome, NumProbes)}
+
+\code{segments <- rep(SegmentMean, NumProbes)}
+
+\code{template <- cbind(chr, segments)}
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -66,7 +72,8 @@ head(mdf[order(mdf$error,-mdf$cellularity),])
 
 ## using segmented data from a QDNAseq-object
 data("copyNumbersSegmented")
-sqm <- squaremodel(copyNumbersSegmented, QDNAseqobjectsample = 2, penalty = 0.5, penploidy = 0.5, 
+sqm <- squaremodel(copyNumbersSegmented, QDNAseqobjectsample = 2, 
+  penalty = 0.5, penploidy = 0.5, 
   ptop = 4.3, pbottom = 1.8, prows = 250)
 sqm$matrixplot
 mdf <- sqm$minimadf

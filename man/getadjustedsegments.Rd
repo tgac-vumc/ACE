@@ -8,11 +8,13 @@ Create a data frame with segment information corresponding to a model
 \code{getadjustedsegments} applies model parameters to segment data and returns a data frame with information of the individual segments, scaled according to the model.
 }
 \usage{
-getadjustedsegments(template, QDNAseqobjectsample = FALSE, cellularity = 1, ploidy = 2, standard, log = FALSE)
+getadjustedsegments(template, QDNAseqobjectsample = FALSE, 
+                    cellularity = 1, ploidy = 2, standard, 
+                    log = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{template}{Object. Either a template data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
+  \item{template}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
   \item{QDNAseqobjectsample}{Integer. Specifies which sample to analyze from the QDNAseq-object. Required when using a QDNAseq-object as template. Default = FALSE}
   \item{cellularity}{Numeric. Used for rescaling bin and segment values. Default = 1}
   \item{ploidy}{Integer. Assume the median of segments has this absolute copy number. Default = 2}
@@ -31,13 +33,14 @@ Jos B. Poell
 }
 
 \seealso{
-  \code{\link{objectsampletotemplate}}, \code{\link{squaremodel}}, \code{\link{singlemodel}}, \code{\link{singleplot}}, \code{\link{analyzegenomiclocations}}, \code{\link{postanalysisloop}}
+  \code{\link{analyzegenomiclocations}}, \code{\link{postanalysisloop}}
 }
 \examples{
 ## using segmented data from a QDNAseq-object
 data("copyNumbersSegmented")
 singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 2)
-getadjustedsegments(copyNumbersSegmented, QDNAseqobjectsample = 2, cellularity = 0.39)
+getadjustedsegments(copyNumbersSegmented, QDNAseqobjectsample = 2, 
+  cellularity = 0.39)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
