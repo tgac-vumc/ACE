@@ -302,7 +302,7 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
   } else {
     bincounter <- 1
     segmentcounter <- 0
-    if(class(equalsegments)!="numeric"){equalsegments<-20}
+    if(!"numeric" %in% is(equalsegments)){equalsegments<-20}
     if(onlyautosomes==TRUE) {
       rlechr <- rle(as.vector(template1$chr[template1$chr %in% 1:22]))
     }	else if (onlyautosomes==FALSE) {rlechr <- rle(as.vector(template1$chr))
@@ -642,7 +642,7 @@ correlationmatrixadjusted <- function(object, trncname=FALSE, equalsegments=FALS
 #  visualization aide!!! 
 
 segmentstotemplate <- function(segmentdf, chrci=1, startci=2, endci=3, binsci=4, meanci=5, seci, sdci, log=FALSE) {
-  if(class(segmentdf)=="character") {segmentdf <- try(read.table(segmentdf, header = TRUE, comment.char = "", sep = "\t"))}
+  if("character" %in% is(segmentdf)) {segmentdf <- try(read.table(segmentdf, header = TRUE, comment.char = "", sep = "\t"))}
   if (inherits(segmentdf, "try-error")) {print(paste0("could not find ", segmentdf))
   } else {
     if(log==TRUE){log<-exp(1)}
