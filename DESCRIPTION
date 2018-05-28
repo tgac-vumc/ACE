@@ -5,7 +5,7 @@ Description: Uses segmented copy number data to estimate tumor cell percentage
 Version: 0.99.1
 Author: Jos B Poell
 Maintainer: Jos B Poell <j.poell@vumc.nl>
-Depends: R
+Depends: R (>= 3.5)
 Imports:
     Biobase,
     QDNAseq,
