@@ -15,6 +15,7 @@ importFrom(Biobase, assayDataElement, "assayDataElement<-",
 importFrom(stats, sd, cor, t.test, wilcox.test, median, mad, pnorm, rnorm, p.adjust, na.exclude)
 importFrom(utils, data, maintainer, packageVersion, read.table, write.table, tail)
 importFrom(grDevices, dev.off, pdf, png)
+importFrom(methods, is)
 
 import(ggplot2)
 
@@ -33,6 +34,7 @@ export("analyzegenomiclocations")
 export("getadjustedsegments")
 export("objectsampletotemplate")
 export("linkmutationdata")
+export("postanalysisloop")
 export("twosamplecompare")
 export("ACEcall")
 export("squaremodelsummary")

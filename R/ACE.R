@@ -741,12 +741,12 @@ getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellulari
 # In case of "append": note that R messes up column names if they have "special" characters or start with numbers
 # outputdir can be specified, so you don't have to save in the same directory (especially handy in loops)
 linkmutationdata <- function(mutationdf, segmentdf, cellularity = 1,chrindex=1,posindex=2,freqindex=3, append=TRUE, outputdir){
-  if("character" %in% is(mutationdf)) {
+  if(is(mutationdf, "character")) {
     filename <- mutationdf
     mutationdf <- try(read.table(filename, header = TRUE, comment.char = "", sep = "\t"))
     writefiles <- TRUE
   } else {writefiles <- FALSE}
-  if("character" %in% is(segmentdf)) {segmentdf <- try(read.table(segmentdf, header = TRUE, comment.char = "", sep = "\t"))}
+  if(is(segmentdf, "character")) {segmentdf <- try(read.table(segmentdf, header = TRUE, comment.char = "", sep = "\t"))}
   if (!inherits(mutationdf, "try-error")) {
     Chromosome <- as.vector(mutationdf[,chrindex])
     Chromosome <- gsub("chr","",Chromosome,ignore.case = TRUE)
@@ -837,10 +837,10 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
     }
   }
   if(missing(copyNumbersSegmented)){print("this function requires a QDNAseq-object")}
-  if("character" %in% is(copyNumbersSegmented)) {copyNumbersSegmented <- try(readRDS(copyNumbersSegmented))}
+  if(is(copyNumbersSegmented, "character")) {copyNumbersSegmented <- try(readRDS(copyNumbersSegmented))}
   if(inherits(copyNumbersSegmented, "try-error")) {print("failed to read RDS-file")}
   if(missing(modelsfile)&&inputdir==FALSE){print("this function requires a tab-delimited file with model information per sample")}
-  if(!missing(modelsfile)&&"character" %in% is(modelsfile)) {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t"))}
+  if(!missing(modelsfile)&&is(modelsfile, "character")) {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t"))}
   if(inherits(models, "try-error")) {print("failed to read modelsfile")}
   if(missing(mutationdata)){print("not linking mutation data")}
   if(!missing(mutationdata)) {
