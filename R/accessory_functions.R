@@ -594,7 +594,7 @@ correlationmatrix <- function(object, trncname=FALSE) {
   samples <- Biobase::sampleNames(object)
   if (trncname==TRUE) {samples <- gsub("_.*","",samples)}
   if (trncname!=FALSE&&trncname!=TRUE) {samples <- gsub(trncname,"",samples)}
-  cormat <- cor(na.exclude(object@assayData$segmented))
+  cormat <- cor(na.exclude(assayData(object)$segmented))
   rownames(cormat) <- samples
   colnames(cormat) <- samples
   return(cormat)
@@ -618,7 +618,7 @@ correlationmatrixadjusted <- function(object, trncname=FALSE, equalsegments=FALS
       }
     }
   } else {
-    size <- length(object@featureData@data$chromosome)
+    size <- length(fData(object)$chromosome)
     tempmat <- matrix(nrow = size, ncol = n)
     for (i in seq_along(samples)) {
       tempmat[,i] <- templatefromequalsegments(object,i,equalsegments=equalsegments,funtype=funtype)$segments
