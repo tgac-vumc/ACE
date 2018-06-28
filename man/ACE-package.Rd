@@ -16,7 +16,7 @@ ACE basically starts from segmented copy number data. To arrive at this point fr
 \item{\code{\link{singleplot}}}{Create an absolute copy number plot of a single sample}
 \item{\code{\link{squaremodel}}}{Perform model fitting on a single sample using both cellularity and ploidy as variable}
 \item{\code{\link{getadjustedsegments}}}{Use obtained model parameters to calculate adjusted segment values}
-\item{\code{\link{linkmutationdata}}}{Link mutation data to copy number data to estimate the number of mutant copies}
+\item{\code{\link{linkvariants}}}{Link variant data to copy number data to estimate the number of mutant copies}
 \item{\code{\link{analyzegenomiclocations}}}{Look up adjusted segment values of specific genomic locations}
 \item{\code{\link{postanalysisloop}}}{Use obtained model parameters for all samples in a QDNAseq-object to print final output, e.g. copy number plots, adjusted segment data, mutation data linked to adjusted copy number data}
 }

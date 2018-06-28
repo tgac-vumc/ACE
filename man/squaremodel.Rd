@@ -10,7 +10,7 @@ Calculate potential fits for a single sample using ploidy as a variable
 \usage{
 squaremodel(template, QDNAseqobjectsample = FALSE, prows=100, 
   ptop=5, pbottom=1, method = 'RMSE', exclude = c(), 
-  penalty = 0, penploidy = 0, highlightminima = TRUE)
+  penalty = 0, penploidy = 0, highlightminima = TRUE, standard)
 }
 
 \arguments{
@@ -24,6 +24,7 @@ squaremodel(template, QDNAseqobjectsample = FALSE, prows=100,
   \item{penalty}{Numeric. Penalizes fits at lower cellularities. Suggested values between 0 and 1. Default = 0 (no penalty)}
   \item{penploidy}{Numeric. Penalizes fits that diverge from 2N with the formula (1+abs(ploidy-2))^penploidy. Default = 0}
   \item{highlightminima}{Logical. Minima are highlighted in the matrixplot by a black dot. Default = TRUE}
+  \item{standard}{Numeric. Force the ploidy to represent this raw value. When omitted, the standard will be calculated from the data}
 }
 
 \details{

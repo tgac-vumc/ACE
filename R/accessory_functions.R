@@ -21,7 +21,7 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   }
   if(missing(title)) {title <- "Plot"}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
   adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   adjcopynumberdata <- as.vector(na.exclude(adjustedcopynumbers))
   adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
@@ -52,9 +52,9 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   amp <- round(ploidy+3,digits=0)-subcutoff
   
   counter <- 1
-  for (i in 1:length(segmentdata$lengths)) {
-    segment_mean[i] <- mean(adjcopynumberdata[counter:(counter+segmentdata$lengths[i]-1)])
-    segment_SE[i] <- sd(adjcopynumberdata[counter:(counter+segmentdata$lengths[i]-1)])/sqrt(segmentdata$lengths[i])
+  for (i in seq_along(segmentdata$lengths)) {
+    segment_mean[i] <- mean(adjcopynumberdata[seq(counter, counter+segmentdata$lengths[i]-1)])
+    segment_SE[i] <- sd(adjcopynumberdata[seq(counter, counter+segmentdata$lengths[i]-1)])/sqrt(segmentdata$lengths[i])
     p[i] <- 2*(1-pnorm(abs(round(ploidy,digits = 0)-segment_mean[i])/segment_SE[i]))
     probnorm[i] <- round(log(p[i],10),digits=3)
     counter <- counter+segmentdata$lengths[i]
@@ -106,13 +106,13 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   
   if(plot==TRUE){
     if(onlyautosomes==TRUE) {
-      rlechr <- rle(as.vector(template$chr[template$chr %in% 1:22]))
+      rlechr <- rle(as.vector(template$chr[template$chr %in% seq(1, 22)]))
     }	else if (onlyautosomes==FALSE) {rlechr <- rle(as.vector(template$chr))
-    } else {rlechr <- rle(as.vector(template$chr[template$chr %in% 1:onlyautosomes]))}
+    } else {rlechr <- rle(as.vector(template$chr[template$chr %in% seq(1, onlyautosomes)]))}
     binchrend <- c()
     currentbin <- 0
     binchrmdl <- c()
-    for (i in 1:length(rlechr$values)) {
+    for (i in seq_along(rlechr$values)) {
       currentmiddle <- currentbin+rlechr$lengths[i]/2
       currentbin <- currentbin+rlechr$lengths[i]
       binchrend <- append(binchrend, currentbin)
@@ -132,10 +132,10 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
     line1 <- paste0("Cellularity: ", cellularity)
     if(missing(chrsubset)){
       calledplot <- ggplot2::ggplot() +
-        scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = c(bottom:cap), expand=c(0,0)) +
+        scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom, cap), expand=c(0,0)) +
         scale_x_continuous(name = "chromosome", limits = c(0,tail(binchrend,1)), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-        geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-        geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
+        geom_hline(yintercept = seq(0, 4), color = '#333333', size = 0.5) +
+        geom_hline(yintercept = seq(5, cap-1), color = 'lightgray', size = 0.5) +
         geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
         geom_point(aes(x = bin,y = adjustedcopynumbers),data=dfna[(dfna$adjustedcopynumbers>bottom&dfna$adjustedcopynumbers<cap),], size = 0.1, color = 'gray') +
         geom_point(aes(x = bin,y = adjustedcopynumbers),data=cappedcopynumbers, size = 0.5, color = 'gray', shape = 24) +
@@ -154,13 +154,13 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
       lastchr <- range(chrsubset)[2]
       if(firstchr==1){firstbin<-0
       } else {firstbin<-binchrend[firstchr-1]+1}
-      dfna <- dfna[dfna$chr %in% rlechr$values[firstchr:lastchr],]
+      dfna <- dfna[dfna$chr %in% rlechr$values[seq(firstchr, lastchr)],]
       calledplot <- ggplot2::ggplot() +
-        scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = c(bottom:cap), expand=c(0,0)) +
-        scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), breaks = binchrmdl[firstchr:lastchr], labels = rlechr$values[firstchr:lastchr], expand = c(0,0)) +
-        geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-        geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
-        geom_vline(xintercept = binchrend[firstchr:lastchr], color = "#666666", linetype = "dashed") +
+        scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom, cap), expand=c(0,0)) +
+        scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), breaks = binchrmdl[seq(firstchr,lastchr)], labels = rlechr$values[seq(firstchr,lastchr)], expand = c(0,0)) +
+        geom_hline(yintercept = seq(0, 4), color = '#333333', size = 0.5) +
+        geom_hline(yintercept = seq(5, cap-1), color = 'lightgray', size = 0.5) +
+        geom_vline(xintercept = binchrend[seq(firstchr,lastchr)], color = "#666666", linetype = "dashed") +
         geom_point(aes(x = bin,y = adjustedcopynumbers),data=dfna[(dfna$adjustedcopynumbers>bottom&dfna$adjustedcopynumbers<cap),], size = 0.1, color = 'gray') +
         geom_point(aes(x = bin,y = adjustedcopynumbers),data=cappedcopynumbers, size = 0.5, color = 'gray', shape = 24) +
         geom_point(aes(x = bin,y = adjustedcopynumbers),data=toppedcopynumbers, size = 0.5, color = 'gray', shape = 25) +
@@ -203,21 +203,21 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
   } else if(missing(name2)) {name2<-"sample2"}
   segmentdata1 <- rle(as.vector(na.exclude(template1$segments)))
   segmentdata2 <- rle(as.vector(na.exclude(template2$segments)))
-  if(missing(standard1)) { standard1 <- median(rep(segmentdata1$values,segmentdata1$lengths)) }
+  if(missing(standard1) || !is(standard1, "numeric")) { standard1 <- median(rep(segmentdata1$values,segmentdata1$lengths)) }
   adjustedcopynumbers1 <- ploidy1 + ((template1$copynumbers-standard1)*(cellularity1*(ploidy1-2)+2))/(cellularity1*standard1)
   adjcnna1 <- as.vector(na.exclude(adjustedcopynumbers1))
-  if(missing(standard2)) { standard2 <- median(rep(segmentdata2$values,segmentdata2$lengths)) }
+  if(missing(standard2) || !is(standard2, "numeric")) { standard2 <- median(rep(segmentdata2$values,segmentdata2$lengths)) }
   adjustedcopynumbers2 <- ploidy2 + ((template2$copynumbers-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
   adjcnna2 <- as.vector(na.exclude(adjustedcopynumbers2))
   template1na <- na.exclude(template1)
   bin <- template1na$bin
   if(altmethod==FALSE){
-    template1na <- template1na[,1:4]
+    template1na <- template1na[, seq(1,4)]
     template1na$copynumbers <- adjcnna1
   }
   template2na <- na.exclude(template2)
   if(altmethod==FALSE){
-    template2na <- template2na[,1:4]
+    template2na <- template2na[, seq(1,4)]
     template2na$copynumbers <- adjcnna2
   }
   
@@ -236,30 +236,30 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
   
   if(equalsegments==FALSE){
     segments1 <- c()
-    for (s in 1:length(segmentdata1$lengths)) {
-      segments1[s] <- sum(segmentdata1$lengths[1:s]) 
+    for (s in seq_along(segmentdata1$lengths)) {
+      segments1[s] <- sum(segmentdata1$lengths[seq(1,s)]) 
     }
     segments2 <- c()
-    for (t in 1:length(segmentdata2$lengths)) {
-      segments2[t] <- sum(segmentdata2$lengths[1:t]) 
+    for (t in seq_along(segmentdata2$lengths)) {
+      segments2[t] <- sum(segmentdata2$lengths[seq(1,t)]) 
     }
     allsegments <- sort(unique(c(segments1,segments2)))
     primer <- 1
-    for (i in 1:(length(allsegments))) {
+    for (i in seq_along(allsegments)) {
       Chromosome[i] <- as.vector(template1na$chr)[primer]
       Start[i] <- as.vector(template1na$start)[primer]
       End[i] <- as.vector(template1na$end)[allsegments[i]]
       Num_Bins[i] <- allsegments[i]-primer+1
-      Mean1[i] <- mean(template1na$copynumbers[primer:allsegments[i]])
-      if(altmethod=="MAD"){Mean1[i] <- median(template1na$copynumbers[primer:allsegments[i]])}
-      SE1[i] <- sd(template1na$copynumbers[primer:allsegments[i]])/sqrt(Num_Bins[i])
-      if(altmethod=="MAD"){SE1[i] <- mad(template1na$copynumbers[primer:allsegments[i]])/sqrt(Num_Bins[i])}
-      Mean2[i] <- mean(template2na$copynumbers[primer:allsegments[i]])
-      if(altmethod=="MAD"){Mean2[i] <- median(template2na$copynumbers[primer:allsegments[i]])}
-      SE2[i] <- sd(template2na$copynumbers[primer:allsegments[i]])/sqrt(Num_Bins[i])
-      if(altmethod=="MAD"){SE2[i] <- mad(template2na$copynumbers[primer:allsegments[i]])/sqrt(Num_Bins[i])}
-      if (Num_Bins[i]>1) {p_value[i] <- t.test(template1na$copynumbers[primer:allsegments[i]],
-                                               template2na$copynumbers[primer:allsegments[i]])$p.value
+      Mean1[i] <- mean(template1na$copynumbers[seq(primer,allsegments[i])])
+      if(altmethod=="MAD"){Mean1[i] <- median(template1na$copynumbers[seq(primer,allsegments[i])])}
+      SE1[i] <- sd(template1na$copynumbers[seq(primer,allsegments[i])])/sqrt(Num_Bins[i])
+      if(altmethod=="MAD"){SE1[i] <- mad(template1na$copynumbers[seq(primer,allsegments[i])])/sqrt(Num_Bins[i])}
+      Mean2[i] <- mean(template2na$copynumbers[seq(primer,allsegments[i])])
+      if(altmethod=="MAD"){Mean2[i] <- median(template2na$copynumbers[seq(primer,allsegments[i])])}
+      SE2[i] <- sd(template2na$copynumbers[seq(primer,allsegments[i])])/sqrt(Num_Bins[i])
+      if(altmethod=="MAD"){SE2[i] <- mad(template2na$copynumbers[seq(primer,allsegments[i])])/sqrt(Num_Bins[i])}
+      if (Num_Bins[i]>1) {p_value[i] <- t.test(template1na$copynumbers[seq(primer,allsegments[i])],
+                                               template2na$copynumbers[seq(primer,allsegments[i])])$p.value
       } else {p_value[i]<-1}
       primer <- allsegments[i]+1
     }
@@ -273,9 +273,9 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       sd2 <- sd(rep(Mean2,Num_Bins))
       Mean2 <- (Mean2-ns2)/sd2
       SE2 <- SE2/sd2
-      for (i in 1:(length(allsegments))) {
-        cn1 <- (template1na$copynumbers[primer:allsegments[i]]-ns1)/sd1
-        cn2 <- (template2na$copynumbers[primer:allsegments[i]]-ns2)/sd2
+      for (i in seq_along(allsegments)) {
+        cn1 <- (template1na$copynumbers[seq(primer,allsegments[i])]-ns1)/sd1
+        cn2 <- (template2na$copynumbers[seq(primer,allsegments[i])]-ns2)/sd2
         if (Num_Bins[i]>1) {p_value[i] <- t.test(cn1,cn2)$p.value
         } else {p_value[i]<-1}
         primer <- allsegments[i]+1
@@ -291,9 +291,9 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       mad2 <- mad(rep(Mean2,Num_Bins))
       Mean2 <- (Mean2-ns2)/mad2
       SE2 <- SE2/mad2
-      for (i in 1:(length(allsegments))) {
-        cn1 <- (template1na$copynumbers[primer:allsegments[i]]-ns1)/mad1
-        cn2 <- (template2na$copynumbers[primer:allsegments[i]]-ns2)/mad2
+      for (i in seq_along(allsegments)) {
+        cn1 <- (template1na$copynumbers[seq(primer,allsegments[i])]-ns1)/mad1
+        cn2 <- (template2na$copynumbers[seq(primer,allsegments[i])]-ns2)/mad2
         if (Num_Bins[i]>1) {p_value[i] <- wilcox.test(cn1,cn2)$p.value
         } else {p_value[i]<-1}
         primer <- allsegments[i]+1
@@ -304,9 +304,9 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
     segmentcounter <- 0
     if(!is(equalsegments, "numeric")){equalsegments<-20}
     if(onlyautosomes==TRUE) {
-      rlechr <- rle(as.vector(template1$chr[template1$chr %in% 1:22]))
+      rlechr <- rle(as.vector(template1$chr[template1$chr %in% seq(1,22)]))
     }	else if (onlyautosomes==FALSE) {rlechr <- rle(as.vector(template1$chr))
-    } else {rlechr <- rle(as.vector(template1$chr[template1$chr %in% 1:onlyautosomes]))}
+    } else {rlechr <- rle(as.vector(template1$chr[template1$chr %in% seq(1,onlyautosomes)]))}
     
     for (c in rlechr$values) {
       nos <- floor(length(template1na$chr[(template1na$chr==c)])/equalsegments)
@@ -318,23 +318,23 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
         leftovers <- 0
       }
       if (leftovers > 0) {
-        for (a in 0:(leftovers-1)) {
+        for (a in seq(0, leftovers-1)) {
           divvy <- a%%nos+1
           nobs[divvy] <- nobs[divvy] + 1
         }
       }
-      for (i in 1:nos) {
+      for (i in seq(1, nos)) {
         if(nobs[i]) {
           Chromosome[segmentcounter + i] <- as.vector(template1na$chr)[bincounter]
           Start[segmentcounter + i] <- as.vector(template1na$start)[bincounter]
           End[segmentcounter + i] <- as.vector(template1na$end)[bincounter+nobs[i]-1]
           Num_Bins[segmentcounter + i] <- nobs[i]
-          Mean1[segmentcounter + i] <- mean(template1na$copynumbers[bincounter:(bincounter+nobs[i]-1)])
-          SE1[segmentcounter + i] <- sd(template1na$copynumbers[bincounter:(bincounter+nobs[i]-1)])/sqrt(nobs[i])
-          Mean2[segmentcounter + i] <- mean(template2na$copynumbers[bincounter:(bincounter+nobs[i]-1)])
-          SE2[segmentcounter + i] <- sd(template2na$copynumbers[bincounter:(bincounter+nobs[i]-1)])/sqrt(nobs[i])
-          p_value[segmentcounter + i] <- t.test(template1na$copynumbers[bincounter:(bincounter+nobs[i]-1)],
-                                                template2na$copynumbers[bincounter:(bincounter+nobs[i]-1)])$p.value
+          Mean1[segmentcounter + i] <- mean(template1na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])
+          SE1[segmentcounter + i] <- sd(template1na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])/sqrt(nobs[i])
+          Mean2[segmentcounter + i] <- mean(template2na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])
+          SE2[segmentcounter + i] <- sd(template2na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])/sqrt(nobs[i])
+          p_value[segmentcounter + i] <- t.test(template1na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)],
+                                                template2na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])$p.value
           bincounter <- bincounter + nobs[i]
         }
       }
@@ -349,11 +349,11 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       sd2 <- sd(rep(Mean2,Num_Bins))
       Mean2 <- (Mean2-ns2)/sd2
       SE2 <- SE2/sd2
-      for (i in 1:(length(Mean1))) {
+      for (i in seq_along(Mean1)) {
         firstbin <- which(template1na$chr==Chromosome[i] & template1na$start==Start[i])
         lastbin <- which(template1na$chr==Chromosome[i] & template1na$end==End[i])
-        cn1 <- (template1na$copynumbers[firstbin:lastbin]-ns1)/sd1
-        cn2 <- (template2na$copynumbers[firstbin:lastbin]-ns2)/sd2
+        cn1 <- (template1na$copynumbers[seq(firstbin, lastbin)]-ns1)/sd1
+        cn2 <- (template2na$copynumbers[seq(firstbin, lastbin)]-ns2)/sd2
         if (Num_Bins[i]>1) {p_value[i] <- t.test(cn1,cn2)$p.value
         } else {p_value[i]<-1}
       }
@@ -367,11 +367,11 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       mad2 <- mad(rep(Mean2,Num_Bins))
       Mean2 <- (Mean2-ns2)/mad2
       SE2 <- SE2/mad2
-      for (i in 1:(length(Mean1))) {
+      for (i in seq_along(Mean1)) {
         firstbin <- which(template1na$chr==Chromosome[i] & template1na$start==Start[i])
         lastbin <- which(template1na$chr==Chromosome[i] & template1na$end==End[i])
-        cn1 <- (template1na$copynumbers[firstbin:lastbin]-ns1)/mad1
-        cn2 <- (template2na$copynumbers[firstbin:lastbin]-ns2)/mad2
+        cn1 <- (template1na$copynumbers[seq(firstbin,lastbin)]-ns1)/mad1
+        cn2 <- (template2na$copynumbers[seq(firstbin,lastbin)]-ns2)/mad2
         if (Num_Bins[i]>1) {p_value[i] <- wilcox.test(cn1,cn2)$p.value
         } else {p_value[i]<-1}
       }
@@ -390,18 +390,18 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       firstchr <- range(chrsubset)[1]
       lastchr <- range(chrsubset)[2]
       rlechr <- rle(as.vector(template1$chr))
-      df <- df[df$chr %in% rlechr$values[firstchr:lastchr],]
+      df <- df[df$chr %in% rlechr$values[seq(firstchr,lastchr)],]
     }
     subsetcorrelation <- cor(df$Mean1,df$Mean2)
     if(onlyautosomes==TRUE) {
-      rlechr <- rle(as.vector(template1$chr[template1$chr %in% 1:22]))
+      rlechr <- rle(as.vector(template1$chr[template1$chr %in% seq(1,22)]))
     }	else if (onlyautosomes==FALSE) {rlechr <- rle(as.vector(template1$chr))
-    } else {rlechr <- rle(as.vector(template1$chr[template1$chr %in% 1:onlyautosomes]))}
+    } else {rlechr <- rle(as.vector(template1$chr[template1$chr %in% seq(1,onlyautosomes)]))}
     binchrend <- c()
     currentbin <- 0
     binchrmdl <- c()
     if(altmethod==FALSE){yname<-"copies"} else {yname <- paste0(altmethod," units")}
-    for (i in 1:length(rlechr$values)) {
+    for (i in seq_along(rlechr$values)) {
       currentmiddle <- currentbin+rlechr$lengths[i]/2
       currentbin <- currentbin+rlechr$lengths[i]
       binchrend <- append(binchrend, currentbin)
@@ -409,16 +409,19 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
     }
     if(missing(chrsubset)){
       compareplot <- ggplot2::ggplot() +
-        scale_y_continuous(name = yname, limits = c(bottom,cap), breaks = c(bottom:cap), expand=c(0,0), sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
-        scale_x_continuous(name = "chromosome", limits = c(0,tail(binchrend,1)), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
+        scale_y_continuous(name = yname, limits = c(bottom,cap), breaks = seq(bottom,cap), expand=c(0,0), 
+                           sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
+        scale_x_continuous(name = "chromosome", limits = c(0,tail(binchrend,1)), 
+                           breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
         geom_bar(aes(x=bin, y = q_value), data=df, fill='green', stat='identity') +
-        geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-        geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
+        geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
+        geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', size = 0.5) +
         geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
         geom_point(aes(x = bin,y = Mean1),data=df, size = 1, color = 'red') +
         geom_point(aes(x = bin,y = Mean2),data=df, size = 1, color = 'blue') +
         theme_classic() + theme(
-          axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black'))
+          axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), 
+          axis.text = element_text(color='black'))
       
       if (legend==TRUE){
         compareplot <- compareplot +
@@ -436,12 +439,15 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       if(firstchr==1){firstbin<-0
       } else {firstbin<-binchrend[firstchr-1]+1}
       compareplot <- ggplot2::ggplot() +
-        scale_y_continuous(name = yname, limits = c(bottom,cap), breaks = c(bottom:cap), expand=c(0,0), sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
-        scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), breaks = binchrmdl[firstchr:lastchr], labels = rlechr$values[firstchr:lastchr], expand = c(0,0)) +
+        scale_y_continuous(name = yname, limits = c(bottom,cap), breaks = seq(bottom,cap), expand=c(0,0), 
+                           sec.axis = sec_axis(~.*qcap/cap, name = "-log10(q-value)")) +
+        scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), 
+                           breaks = binchrmdl[seq(firstchr,lastchr)], 
+                           labels = rlechr$values[seq(firstchr,lastchr)], expand = c(0,0)) +
         geom_bar(aes(x=bin, y = q_value), data=df, fill='green', stat='identity') +
-        geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-        geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
-        geom_vline(xintercept = binchrend[firstchr:lastchr], color = "#666666", linetype = "dashed") +
+        geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
+        geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', size = 0.5) +
+        geom_vline(xintercept = binchrend[seq(firstchr,lastchr)], color = "#666666", linetype = "dashed") +
         geom_point(aes(x = bin,y = Mean1),data=df, size = 1, color = 'red') +
         geom_point(aes(x = bin,y = Mean2),data=df, size = 1, color = 'blue') +
         theme_classic() + theme(
@@ -502,7 +508,7 @@ squaremodelsummary <- function(template,QDNAseqobjectsample=FALSE,squaremodel,sa
                                                         ", penalty = ",squaremodel$penalty,
                                                         ", penploidy = ",squaremodel$penploidy))
   if (cnplots!=0) {
-    for (i in 1:cnplots) {
+    for (i in seq(1,cnplots)) {
       index <- tail(which(squaremodel$minimadf$error==unique(sort(squaremodel$minimadf$error))[i]),1)
       plots[[1+i]] <- singleplot(template=template,QDNAseqobjectsample=QDNAseqobjectsample,standard=1,
                                  cellularity=squaremodel$minimadf$cellularity[index],
@@ -550,7 +556,7 @@ loopsquaremodel <- function(object,ptop=5,pbottom=1,prows=100,method='RMSE',pena
   sqmlist <- vector(mode = 'list', length = length(pd$name))
   matrixplots <- vector(mode = 'list', length = length(pd$name))
   
-  for (i in 1:length(pd$name)) {
+  for (i in seq_along(pd$name)) {
     model <- squaremodel(object,QDNAseqobjectsample=i,ptop=ptop,pbottom=pbottom,prows=prows,
                          penalty=penalty,penploidy=penploidy,method=method)
     sqmlist[[i]]$samplename <- pd$name[i]
@@ -604,9 +610,9 @@ correlationmatrixadjusted <- function(object, trncname=FALSE, equalsegments=FALS
     colnames(cormat) <- samples
     rownames(cormat) <- samples
     cormat[n,n] <- 1
-    for (i in 1:(n-1)) {
+    for (i in seq(1, n-1)) {
       cormat[i,i] <- 1
-      for (j in (i+1):n) {
+      for (j in seq(i+1, n)) {
         cormat[i,j] <- twosamplecompare(object,i,index2=j)$correlation
         cormat[j,i] <- cormat[i,j]
       }
@@ -614,7 +620,7 @@ correlationmatrixadjusted <- function(object, trncname=FALSE, equalsegments=FALS
   } else {
     size <- length(object@featureData@data$chromosome)
     tempmat <- matrix(nrow = size, ncol = n)
-    for (i in 1:length(samples)) {
+    for (i in seq_along(samples)) {
       tempmat[,i] <- templatefromequalsegments(object,i,equalsegments=equalsegments,funtype=funtype)$segments
     }
     segmentdf <- na.exclude(as.data.frame(tempmat))
@@ -654,21 +660,21 @@ segmentstotemplate <- function(segmentdf, chrci=1, startci=2, endci=3, binsci=4,
     chr <- gsub("chr","",chr,ignore.case = TRUE)
     if(!missing(sdci)) {
       copynumbers <- c()
-      for (i in 1:length(segmentdf[,1])) {copynumbers <- append(copynumbers,rnorm(n=segmentdf[i,binsci],
+      for (i in seq_along(segmentdf[,1])) {copynumbers <- append(copynumbers,rnorm(n=segmentdf[i,binsci],
                                                                                   mean=segmentdf[i,meanci],
                                                                                   sd=segmentdf[i,sdci]))}
     } else if(!missing(seci)) {
       copynumbers <- c()
-      for (i in 1:length(segmentdf[,1])) {copynumbers <- append(copynumbers,rnorm(n=segmentdf[i,binsci],
+      for (i in seq_along(segmentdf[,1])) {copynumbers <- append(copynumbers,rnorm(n=segmentdf[i,binsci],
                                                                                   mean=segmentdf[i,meanci],
                                                                                   sd=(segmentdf[i,seci]*sqrt(segmentdf[i,binsci]))))}
     } else {
       copynumbers <- segments
     }
-    bin <- 1:length(segments)
+    bin <- seq_along(segments)
     start <- c()
     end <- c()
-    for (i in 1:length(segmentdf[,1])) {
+    for (i in seq_along(segmentdf[,1])) {
       start <- append(start,round(seq(from=segmentdf[i,startci],by=(segmentdf[i,endci]+1-segmentdf[i,startci])/segmentdf[i,binsci],
                                 length.out=segmentdf[i,binsci])))
       end <- append(end,round(seq(to=segmentdf[i,endci],by=(segmentdf[i,endci]+1-segmentdf[i,startci])/segmentdf[i,binsci],
@@ -692,13 +698,13 @@ compresstemplate <- function(template, factor = 20, funtype = 'median'){
   
   rlechr <- rle(as.vector(template$chr))
   
-  for (c in 1:length(rlechr$values)) {
+  for (c in seq_along(rlechr$values)) {
     nob <- rlechr$lengths[c]
     nnb <- floor(nob/factor)
     vob <- rep(factor, nnb)
     leftovers <- nob%%factor
     if (leftovers > 0) {
-      for (a in 0:(leftovers-1)) {
+      for (a in seq(0, leftovers-1)) {
         divvy <- a%%nnb+1
         vob[divvy] <- vob[divvy] + 1
       }
@@ -708,8 +714,8 @@ compresstemplate <- function(template, factor = 20, funtype = 'median'){
       chr[nbcounter] <- rlechr$values[c]
       start[nbcounter] <- template$start[bincounter]
       end[nbcounter] <- template$end[bincounter+i-1]
-      copynumbers[nbcounter] <- fun(template$copynumbers[bincounter:(bincounter+i-1)], na.rm = TRUE)
-      segments[nbcounter] <- fun(template$segments[bincounter:(bincounter+i-1)], na.rm = TRUE)
+      copynumbers[nbcounter] <- fun(template$copynumbers[seq(bincounter, bincounter+i-1)], na.rm = TRUE)
+      segments[nbcounter] <- fun(template$segments[seq(bincounter, bincounter+i-1)], na.rm = TRUE)
       nbcounter <- nbcounter + 1
       bincounter <- bincounter + i
     }
@@ -742,9 +748,9 @@ templatefromequalsegments <- function(template, QDNAseqobjectsample = FALSE, equ
   bin <- as.vector(template$bin)
   
   if(onlyautosomes==TRUE) {
-    rlechr <- rle(as.vector(template$chr[template$chr %in% 1:22]))
+    rlechr <- rle(as.vector(template$chr[template$chr %in% seq(1,22)]))
   }	else if (onlyautosomes==FALSE) {rlechr <- rle(as.vector(template$chr))
-  } else {rlechr <- rle(as.vector(template$chr[template$chr %in% 1:onlyautosomes]))}
+  } else {rlechr <- rle(as.vector(template$chr[template$chr %in% seq(1, onlyautosomes)]))}
   
   if(!missing(chrsubset)){
     chromosomes <- rlechr$values[chrsubset]
@@ -761,15 +767,15 @@ templatefromequalsegments <- function(template, QDNAseqobjectsample = FALSE, equ
       leftovers <- 0
     }
     if (leftovers > 0) {
-      for (a in 0:(leftovers-1)) {
+      for (a in seq(0, leftovers-1)) {
         divvy <- a%%nos+1
         nobs[divvy] <- nobs[divvy] + 1
       }
     }
     
-    for (i in 1:nos) {
+    for (i in seq(1, nos)) {
       if(nobs[i]) {
-        segments[which(!is.na(copynumbers)&chr==c)[bincounter:(bincounter+nobs[i]-1)]] <- rep(fun(copynumbers[which(!is.na(copynumbers)&chr==c)[bincounter:(bincounter+nobs[i]-1)]]),nobs[i])
+        segments[which(!is.na(copynumbers)&chr==c)[seq(bincounter, bincounter+nobs[i]-1)]] <- rep(fun(copynumbers[which(!is.na(copynumbers)&chr==c)[seq(bincounter, bincounter+nobs[i]-1)]]),nobs[i])
         bincounter <- bincounter + nobs[i]
       }
     }

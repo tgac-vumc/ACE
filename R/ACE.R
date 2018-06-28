@@ -1,6 +1,6 @@
 ##### ACE has arrived! #####
 # There are a number of functions: ACE, ploidyplotloop, objectsampletotemplate, singlemodel, squaremodel, singleplot, 
-# getadjustedsegments, linkmutationdata, postanalysisloop, analyzegenomiclocations.
+# getadjustedsegments, linkvariants, postanalysisloop, analyzegenomiclocations.
 # I have also added the "multiplot" function for making summary sheets.
 
 # ACE takes a folder with rds-files (default, make sure all are segmented) or bam-files and returns plots for the most likely errors in convenient subfolders
@@ -38,7 +38,7 @@
 # singlemodel comes with the awesomeness of manual input: you can restrain the model to the ploidy you expect (default 2, but hey, ploidy 5 happens, right?)
 # and you can tell the program if you think there is a different standard (this should only be necessary when the median segment happens to be a subclonal variant; very rare)
 
-# squaremodel: this function drops the assumption of a standard, and instead runs the algorithm for each ploidy being the standard.
+# squaremodel: runs the algorithm for each tested ploidy being the standard.
 # if you feel you are doing too much tinkering with variables using the singlemodel function, then try this!
 # you can choose the range of ploidies it should test; the default being all ploidies between 5 and 1 in 100 decrements of 0.04
 # like singlemodel, the function returns a list, which you can save to a variable
@@ -51,34 +51,35 @@
 # and the nearest ploidy with the chance (log10 p-value) that the segment has this ploidy. A very low p-value indicates a high chance of subclonality, 
 # although this value should be approached with extreme caution (and is at the moment not corrected for multiple testing)
 
-# linkmutationdata: now we're talking! Give a tab-delimited file with mutation data, and this function will tell you what the copy number is
+# linkvariants: now we're talking! Give a tab-delimited file with variant data, and this function will tell you what the copy number is
 # at that genomic location, and it will guess how many copies are mutant! Read more about the options for this function in the code
+# now includes an option to analyze germline heterozygous SNPs!
 
 # postanalysisloop: you've run ACE, you've picked your models, you have your mutation data ... Now if you could only ...
 # say no more! this function combines the power of all above functions and your own brain (you still choose the models)
-# only for the brave of heart
+# for the brave of heart
 
-# analyzegenomiclocations: a sort of simplified version of linkmutationdata, you can manually input a single genomic location as specified by chromosome and position
+# analyzegenomiclocations: a sort of simplified version of linkvariants, you can manually input a single genomic location as specified by chromosome and position
 # you can also input multiple locations using vectors of the same length. The output will be a dataframe. You can also enter frequencies 
 # to quickly calculate mutant copies, but then you also need to enter cellularity! Note: the function requires the dataframe with
 # adjusted segments (output of getadjustedsegments)
 
 # That's pretty much it for now, let me know if you run into some errors or oddities j.poell@vumc.nl
 
-runACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploidies = 2, imagetype = 'pdf', method = 'RMSE', 
-                penalty = 0, cap = 12, bottom = 0, trncname = FALSE, printsummaries = TRUE, autopick = FALSE) { 
+runACE <- function(inputdir = "./", outputdir, filetype = 'rds', genome = "hg19", binsizes, ploidies = 2, imagetype = 'pdf', 
+                   method = 'RMSE', penalty = 0, cap = 12, bottom = 0, trncname = FALSE, printsummaries = TRUE, autopick = FALSE) { 
 	imagefunction <- get(imagetype)
 	if(substr(inputdir,nchar(inputdir),nchar(inputdir)) != "/") {inputdir <- paste0(inputdir,"/")}
 	if(missing(outputdir)) { outputdir <- substr(inputdir,0,nchar(inputdir)-1) }
 	if(!dir.exists(outputdir)) {dir.create(outputdir)}
 	if(filetype=='bam'){
-		if(missing(binsizes)) { binsizes <- c(30,100,500,1000) }
+		if(missing(binsizes)) { binsizes <- c(100,500,1000) }
 	  parameters <- data.frame(options = c("inputdir","outputdir","filetype","binsizes","ploidies","imagetype","method","penalty","cap","bottom","trncname","printsummaries","autopick"), 
 	                           values = c(inputdir,outputdir,filetype,paste0(binsizes,collapse=", "),paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,bottom,trncname,printsummaries,autopick))
 	  for (b in binsizes) {
 		  currentdir <- file.path(outputdir,paste0(b,"kbp"))
 		  dir.create(currentdir)
-		  bins <- QDNAseq::getBinAnnotations(binSize = b)
+		  bins <- QDNAseq::getBinAnnotations(binSize = b, genome = genome)
 		  readCounts <- QDNAseq::binReadCounts(bins, path = inputdir)
 		  readCountsFiltered <- QDNAseq::applyFilters(readCounts, residual = TRUE, blacklist = TRUE)
 		  readCountsFiltered <- QDNAseq::estimateCorrection(readCountsFiltered)
@@ -98,7 +99,7 @@ runACE <- function(inputdir = "./", outputdir, filetype = 'rds', binsizes, ploid
 	  parameters <- data.frame(options = c("inputdir","outputdir","filetype","ploidies","imagetype","method","penalty","cap","bottom","trncname","printsummaries","autopick"), 
 	                           values = c(inputdir,outputdir,filetype,paste0(ploidies,collapse=", "),imagetype,method,penalty,cap,bottom,trncname,printsummaries,autopick))
 	  files <- list.files(inputdir, pattern = "\\.rds$")
-	  for (f in 1:length(files)) {
+	  for (f in seq_along(files)) {
 			currentdir <- file.path(outputdir,paste0(substr(files[f],0,nchar(files[f])-4)))
 			dir.create(currentdir)
 			copyNumbersSegmented <- readRDS(file.path(inputdir,files[f]))
@@ -133,8 +134,8 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   	colnames(fitpicker) <- c("sample","likely_fit","ploidy","standard","fit_1","fit_2","fit_3","fit_4","fit_5","fit_6","fit_7","fit_8","fit_9","fit_10","fit_11","fit_12")
   	dir.create(file.path(qdir,"likelyfits"))  
   	
-  	for (a in 1:length(pd$name)) {
-  		segmentdata <- rle(as.vector(na.exclude(copyNumbersSegmented@assayData$segmented[,a])))
+  	for (a in seq_along(pd$name)) {
+  		segmentdata <- rle(as.vector(na.exclude(assayData(copyNumbersSegmented)$segmented[,a])))
   		standard <- median(rep(segmentdata$values,segmentdata$lengths))
   			
   		fraction <- c()
@@ -142,13 +143,13 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		temp <- c()
   		errorlist <- c()
   		
-  		for (i in 5:100) {
+  		for (i in seq(5,100)) {
   		  fraction[i-4] <- i/100
-  		  for (p in 1:12) {
-  		    expected[p] <- standard*(1+(p-q)*fraction[i-4]/(fraction[i-4]*(q-2)+2))
+  		  for (p in seq(1,12)) {
+  		    expected[p] <- standard*(p*fraction[i-4] + 2*(1-fraction[i-4]))/(fraction[i-4]*q + 2*(1-fraction[i-4]))
   		  }
   		  # the maximum error 0.5 was added to make sure hyperamplifications (p>12) don't get ridiculous errors
-  		  for (j in 1:length(segmentdata$values)) {
+  		  for (j in seq_along(segmentdata$values)) {
   		    if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))^2}
   		    else if(method=='SMRE') {temp[j] <- sqrt(min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))}
   		    else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty)}
@@ -169,7 +170,7 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  rerror[1] <- errorlist[1]/max(errorlist)
   		}
   		
-  		for (l in 6:99) {
+  		for (l in seq(6,99)) {
   		  if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits = 10)) { 
   			lastminimum <- fraction[l-4]
   			minima <- append(minima,fraction[l-4])
@@ -184,15 +185,15 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		}
   		 			
   		expsd <- sqrt(pd$expected.variance[a])
-  		obssd <- QDNAseq:::sdDiffTrim(copyNumbersSegmented@assayData$copynumber[,a], na.rm=TRUE)
-  		chr <- fd$chromosome[fd$chromosome %in% 1:22]
-  		bin <- 1:length(chr)
+  		obssd <- QDNAseq:::sdDiffTrim(assayData(copyNumbersSegmented)$copynumber[,a], na.rm=TRUE)
+  		chr <- fd$chromosome[fd$chromosome %in% seq(1,22)]
+  		bin <- seq_along(chr)
   		rlechr <- rle(chr)
   		lastchr <- length(rlechr$values)
   		binchrend <- c()
   		currentbin <- 0
   		binchrmdl <- c()
-  		for (i in 1:length(rlechr$values)) {
+  		for (i in seq_along(rlechr$values)) {
   		  currentmiddle <- currentbin+rlechr$lengths[i]/2
   		  currentbin <- currentbin+rlechr$lengths[i]
   		  binchrend <- append(binchrend, currentbin)
@@ -207,7 +208,7 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   			
   		dir.create(file.path(fp,"graphs"))
   		
-  		cellularity <- 5:100
+  		cellularity <- seq(5,100)
   		tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
   		minimadf <- data.frame(minima=minima*100,rerror)
   		tempplot <- ggplot2::ggplot() +
@@ -240,11 +241,11 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		fitpicker[a,4] <- standard
   		
 
-  		for (m in 1:length(minima)) {
+  		for (m in seq_along(minima)) {
   		  fitpicker[a,m+4] <- minima[m]
-  		  adjustedcopynumbers <- q + ((copyNumbersSegmented@assayData$copynumber[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
-  		  adjustedsegments <- q + ((copyNumbersSegmented@assayData$segmented[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
-  		  df <- as.data.frame(cbind(bin,adjustedcopynumbers[1:length(bin)],adjustedsegments[1:length(bin)]))
+  		  adjustedcopynumbers <- q + ((assayData(copyNumbersSegmented)$copynumber[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
+  		  adjustedsegments <- q + ((assayData(copyNumbersSegmented)$segmented[,a]-standard)*(minima[m]*(q-2)+2))/(minima[m]*standard)
+  		  df <- as.data.frame(cbind(bin,adjustedcopynumbers[seq_along(bin)],adjustedsegments[seq_along(bin)]))
   		  colnames(df)[2] <- "copynumbers"
   		  colnames(df)[3] <- "segments"
   		  dfna <- na.exclude(df)
@@ -265,10 +266,10 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  fn <- file.path(fp,"graphs",paste0(pd$name[a], " - ",q,"N fit ", m, ".",imagetype))
   		  
   		  tempplot <- ggplot2::ggplot() +
-    			scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = c(bottom:cap), expand=c(0,0)) +
+    			scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom,cap), expand=c(0,0)) +
     			scale_x_continuous(name = "chromosome", limits = c(0,binchrend[lastchr]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-    			geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-    			geom_hline(yintercept = c(5:cap-1), color = 'lightgray', size = 0.5) +
+    			geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
+    			geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', size = 0.5) +
     			geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
     			geom_point(aes(x = bin,y = copynumbers),data=dfna[dfna$copynumbers>bottom&dfna$copynumbers<cap,], size = 0.1, color = 'black') +
   		    geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
@@ -377,15 +378,15 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 # those function can take QDNAseq objects when specified, so it is not necessary to run this separately
 objectsampletotemplate <- function(copyNumbersSegmented, index = 1) {
   fd <- Biobase::fData(copyNumbersSegmented)
-	try(segments <- as.vector(copyNumbersSegmented@assayData$segmented[,index]))
-	copynumbers <- as.vector(copyNumbersSegmented@assayData$copynumber[,index])
+	try(segments <- as.vector(assayData(copyNumbersSegmented)$segmented[,index]))
+	copynumbers <- as.vector(assayData(copyNumbersSegmented)$copynumber[,index])
 	chr <- as.vector(fd$chromosome)
 	start <- as.vector(fd$start)
 	end <- as.vector(fd$end)
-	bin <- 1:length(chr)
+	bin <- seq_along(chr)
 	if(inherits(segments,"NULL")){
 	  template <- data.frame(bin,chr,start,end,copynumbers)
-	} else {	template <- data.frame(bin,chr,start,end,copynumbers,segments) }
+	} else {	template <- data.frame(bin,chr,start,end,copynumbers,segments)}
 	return(template)
 }
 
@@ -398,18 +399,19 @@ singlemodel <- function(template,QDNAseqobjectsample = FALSE, ploidy = 2, standa
   if(QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
   template <- template[!template$chr %in% exclude,]
 	segmentdata <- rle(as.vector(na.exclude(template$segments)))
-	if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
-			
+	if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
+	
 	fraction <- c()
 	expected <- c()
 	temp <- c()
 	errorlist <- c()
-	for (i in 5:100) {
+	for (i in seq(5,100)) {
 		fraction[i-4] <- i/100
-		for (p in 1:12) {
-		  expected[p] <- standard*(1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2))
+		for (p in seq(1,12)) {
+		  expected[p] <- standard*(p*fraction[i-4] + 2*(1-fraction[i-4]))/(fraction[i-4]*ploidy + 2*(1-fraction[i-4]))
+#		  expected[p] <- standard*(1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2))
 		}
-		for (j in 1:length(segmentdata$values)) {
+		for (j in seq_along(segmentdata$values)) {
 		  if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))^2}
 		  else if(method=='SMRE') {temp[j] <- sqrt(min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty))}
 		  else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty)}
@@ -429,7 +431,7 @@ singlemodel <- function(template,QDNAseqobjectsample = FALSE, ploidy = 2, standa
 		minima[1] <- fraction[1]
 		rerror[1] <- errorlist[1]/max(errorlist)
 	}
-	for (l in 6:99) {
+	for (l in seq(6,99)) {
 		if (round(errorlist[l-4], digits = 10) < round(errorlist[l-5], digits = 10) & round(errorlist[l-4], digits = 10) < round(errorlist[l-3], digits =10)) { 
 			lastminimum <- fraction[l-4]
 			minima <- append(minima,fraction[l-4])
@@ -442,7 +444,7 @@ singlemodel <- function(template,QDNAseqobjectsample = FALSE, ploidy = 2, standa
 		rerror <- append(rerror, errorlist[100-4]/max(errorlist))
 	}
   
-	cellularity <- 5:100
+	cellularity <- seq(5,100)
 	tempdf <- data.frame(cellularity,errorlist=errorlist/max(errorlist))
 	minimadf <- data.frame(minima=minima*100,rerror)
 	if(highlightminima==TRUE) {
@@ -478,37 +480,36 @@ singlemodel <- function(template,QDNAseqobjectsample = FALSE, ploidy = 2, standa
 # Also, with pooring quality or lots of subclonality, it is more common for the standard to be messed up
 # In line with graphs presented by ASCAT and CELLULOID, squaremodel will do fitting and plot a graph for 
 #   fits using two variables: ploidy and cellularity
-# The use of a standard is no longer necessary: the fits are all using standard = 1
-# This is relevant to keep in mind, because you have to specify standard = 1 if you use the fit in singleplot
 # On top of the penalty for low cellularity, you can also add a penalty for ploidies
 # It is implemented as follows: error*(1+abs(ploidy-2))^penploidy
 # The plot has the two variables as axis and the color code indicates the relative error
 # To make the minima pop out, the color code is the inverse of the relative error
 # Minima are found by checking each value for neighboring values, and will only return true if its the lowest error
 squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5, pbottom=1, method = 'RMSE', 
-                        exclude = c(), penalty = 0, penploidy = 0, highlightminima = TRUE) {
+                        exclude = c(), penalty = 0, penploidy = 0, highlightminima = TRUE, standard) {
   if(QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
   template <- template[!template$chr %in% exclude,]
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  cellularity <- 5:100
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
+  cellularity <- seq(5,100)
   error <- c()
   fraction <- c()
   errormatrix <- matrix(nrow=(prows+1),ncol=96)
   listofploidy <- c()
   listofcellularity <- c()
   listoferrors <- c()
-  for (t in 0:prows) {
+  for (t in seq(0,prows)) {
     ploidy <- ptop-((ptop-pbottom)/prows)*t
     listofploidy <- append(listofploidy, rep(ploidy,96))
     expected <- c()
     temp <- c()
     errorlist <- c()
-    for (i in 5:100) {
+    for (i in seq(5,100)) {
       fraction[i-4] <- i/100
-      for (p in 1:12) {
-        expected[p] <- 1+(p-ploidy)*fraction[i-4]/(fraction[i-4]*(ploidy-2)+2)
+      for (p in seq(1,12)) {
+        expected[p] <- standard*(p*fraction[i-4] + 2*(1-fraction[i-4]))/(fraction[i-4]*ploidy + 2*(1-fraction[i-4]))
       }
-      for (j in 1:length(segmentdata$values)) {
+      for (j in seq_along(segmentdata$values)) {
         if(method=='RMSE') {temp[j] <- (min(abs(segmentdata$values[j]-expected),0.5)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty))^2}
         else if(method=='SMRE') {temp[j] <- sqrt(min(abs(segmentdata$values[j]-expected),0.5)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty))}
         else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty)}
@@ -524,14 +525,14 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
     
   }
   minimat <- matrix(nrow=(prows+1),ncol=96)
-  for (i in 1:(prows+1)) {
-    for (j in 1:96) {
+  for (i in seq(1,prows+1)) {
+    for (j in seq(1,96)) {
       if (i==1|i==(prows+1)) {
         minimat[i,j] <- FALSE
       } else if (j==96) {
-        minimat[i,j] <- errormatrix[i,j]==min(errormatrix[(i-1):(i+1),(j-1):j])
+        minimat[i,j] <- errormatrix[i,j]==min(errormatrix[seq(i-1,i+1),seq(j-1,j)])
       } else {
-        minimat[i,j] <- errormatrix[i,j]==min(errormatrix[(i-1):(i+1),(j-1):(j+1)])
+        minimat[i,j] <- errormatrix[i,j]==min(errormatrix[seq(i-1,i+1),seq(j-1,j+1)])
       }
     }
   }
@@ -561,6 +562,7 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
   return(list(method=method, 
               penalty=penalty, 
               penploidy=penploidy,
+              standard=standard,
               errormatrix=errormatrix, 
               minimatrix = minimat, 
               errordf=errordf, 
@@ -591,20 +593,20 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
   }
   if(missing(title)) {title <- "Plot"}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
   adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
 	adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
 	template$chr <- gsub("chr","",template$chr,ignore.case = TRUE)
 	df <- data.frame(bin=template$bin,chr=template$chr,adjustedcopynumbers,adjustedsegments)
 	
 	if(onlyautosomes==TRUE) {
-	  rlechr <- rle(as.vector(template$chr[template$chr %in% 1:22]))
+	  rlechr <- rle(as.vector(template$chr[template$chr %in% seq(1,22)]))
 	}	else if (onlyautosomes==FALSE) {rlechr <- rle(as.vector(template$chr))
-	} else {rlechr <- rle(as.vector(template$chr[template$chr %in% 1:onlyautosomes]))}
+	} else {rlechr <- rle(as.vector(template$chr[template$chr %in% seq(1,onlyautosomes)]))}
 	binchrend <- c()
 	currentbin <- 0
 	binchrmdl <- c()
-	for (i in 1:length(rlechr$values)) {
+	for (i in seq_along(rlechr$values)) {
 		currentmiddle <- currentbin+rlechr$lengths[i]/2
 		currentbin <- currentbin+rlechr$lengths[i]
 		binchrend <- append(binchrend, currentbin)
@@ -622,7 +624,7 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
 	if(!missing(chrsubset)){
 	  firstchr <- range(chrsubset)[1]
 	  lastchr <- range(chrsubset)[2]
-	  dfna <- dfna[dfna$chr %in% rlechr$values[firstchr:lastchr],]
+	  dfna <- dfna[dfna$chr %in% rlechr$values[seq(firstchr,lastchr)],]
 	}
 	cappedcopynumbers <- dfna[dfna$copynumbers > cap,]
 	if(length(cappedcopynumbers$copynumbers)>0) {cappedcopynumbers$copynumbers <- cap-0.1}
@@ -642,10 +644,10 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
 	}
 	if(missing(chrsubset)){
   	ggplot2::ggplot() +
-  		scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = c(bottom:cap), expand=c(0,0)) +
+  		scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom,cap), expand=c(0,0)) +
   		scale_x_continuous(name = "chromosome", limits = c(0,tail(binchrend,1)), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-  		geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-  		geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
+  		geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
+  		geom_hline(yintercept = seq(5,(cap-1)), color = 'lightgray', size = 0.5) +
   		geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
   		geom_point(aes(x = bin,y = copynumbers),data=dfna[dfna$copynumbers>bottom&dfna$copynumbers<cap,], size = 0.1, color = 'black') +
   	  geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
@@ -665,11 +667,13 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
 	  if(firstchr==1){firstbin<-0
 	  } else {firstbin<-binchrend[firstchr-1]+1}
 	  ggplot2::ggplot() +
-	    scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = c(bottom:cap), expand=c(0,0)) +
-	    scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), breaks = binchrmdl[firstchr:lastchr], labels = rlechr$values[firstchr:lastchr], expand = c(0,0)) +
-	    geom_hline(yintercept = c(0:4), color = '#333333', size = 0.5) +
-	    geom_hline(yintercept = c(5:(cap-1)), color = 'lightgray', size = 0.5) +
-	    geom_vline(xintercept = binchrend[firstchr:lastchr], color = "#666666", linetype = "dashed") +
+	    scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom,cap), expand=c(0,0)) +
+	    scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), 
+	                       breaks = binchrmdl[seq(firstchr,lastchr)], 
+	                       labels = rlechr$values[seq(firstchr,lastchr)], expand = c(0,0)) +
+	    geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
+	    geom_hline(yintercept = seq(5,(cap-1)), color = 'lightgray', size = 0.5) +
+	    geom_vline(xintercept = binchrend[seq(firstchr,lastchr)], color = "#666666", linetype = "dashed") +
 	    geom_point(aes(x = bin,y = copynumbers),data=dfna[dfna$copynumbers>bottom&dfna$copynumbers<cap,], size = 0.1, color = 'black') +
 	    geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
 	    geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.5, color = 'black', shape = 25) +
@@ -690,7 +694,7 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
 getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, ploidy = 2, standard, log=FALSE) {
   if(QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  if(missing(standard)) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
   adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   template.na <- na.exclude(template)
@@ -706,7 +710,7 @@ getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellulari
   Copies <- c()
   P_log10 <- c()
   counter <- 1
-  for (i in 1:length(adjsegmentdata$lengths)) {
+  for (i in seq_along(adjsegmentdata$lengths)) {
     Chromosome[i] <- as.vector(template.na$chr)[counter]
     Start[i] <- as.vector(template.na$start)[counter]
     End[i] <- as.vector(template.na$end)[counter+adjsegmentdata$lengths[i]-1]
@@ -716,8 +720,8 @@ getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellulari
       Segment_Mean[i] <- log(segmentdata$values[i]/standard, log)}
     if(log==FALSE) {
       Segment_Mean[i] <- adjsegmentdata$values[i]
-      Segment_Mean2[i] <- mean(adjcopynumberdata[counter:(counter+adjsegmentdata$lengths[i]-1)])
-      Segment_SE[i] <- sd(adjcopynumberdata[counter:(counter+adjsegmentdata$lengths[i]-1)])/sqrt(Num_Probes[i])
+      Segment_Mean2[i] <- mean(adjcopynumberdata[seq(counter, counter+adjsegmentdata$lengths[i]-1)])
+      Segment_SE[i] <- sd(adjcopynumberdata[seq(counter, counter+adjsegmentdata$lengths[i]-1)])/sqrt(Num_Probes[i])
       Copies[i] <- round(Segment_Mean2[i])
       P_log10[i] <- round(log(2*(1-pnorm(abs(Copies[i]-Segment_Mean2[i])/Segment_SE[i])),10),digits=3)
     }
@@ -729,49 +733,122 @@ getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellulari
 }
 
 
-# If you have mutation data, you can use this function to find the ploidy of the corresponding genomic location
-# Currently it expects a tab-delimited file with Chromosome, Position, and Frequency in columns 1, 2, and 3 respectively
-# You can use the arguments to specify which columns if this is more convenient
-# Frequency is expected to be a percentage! You can multiply Mutant_copies with 100 if it is given as a fraction
-# The file should end with .txt, .csv or .tsv and not have any other dots beside the one before the extension!
-# It expects the file to have a header row, which may be commented with a #
-# You also need your segmentvalues using the getadjustedsegments function, either as a dataframe or file
-# You can append the new columns to the original file (it will still save it under a new name) 
-# or only output the used columns and new columns (filename is the same)
-# In case of "append": note that R messes up column names if they have "special" characters or start with numbers
-# outputdir can be specified, so you don't have to save in the same directory (especially handy in loops)
-linkmutationdata <- function(mutationdf, segmentdf, cellularity = 1,chrindex=1,posindex=2,freqindex=3, append=TRUE, outputdir){
-  if(is(mutationdf, "character")) {
-    filename <- mutationdf
-    mutationdf <- try(read.table(filename, header = TRUE, comment.char = "", sep = "\t"))
+# If you have mutation data, you can use this function to find the number of
+# copies of the corresponding genomic location. It expects a data frame with
+# columns specifying Chromosome, Position, and Frequency (variant allele
+# frequency in percentage). It can also be a file path to a tab-delimited
+# file.linkvariants uses a data frame with segment information, such as created
+# by getadjustedsegments. Again, this can be either a data frame or a file path
+# of a tab-delimited text file. The function is also able to calculate variant
+# copies in case it concerns heterozygous germline variants. Finally, the
+# function can provide a confidence interval, but it needs an indication of read
+# depth for this. When available, it will use the binom.test function to
+# calculate upper and lower bounds of the chosen confidence level.
+
+linkvariants <- function(variantdf, segmentdf, cellularity = 1, hetSNPs = FALSE,
+                         chrindex=1,posindex=2,freqindex=3,altreadsindex,
+                         totalreadsindex,refreadsindex,confidencelevel=FALSE,
+                         append=TRUE, outputdir){
+  if(is(variantdf, "character")) {
+    filename <- variantdf
+    variantdf <- try(read.table(filename, header = TRUE, comment.char = "", sep = "\t"))
     writefiles <- TRUE
   } else {writefiles <- FALSE}
   if(is(segmentdf, "character")) {segmentdf <- try(read.table(segmentdf, header = TRUE, comment.char = "", sep = "\t"))}
-  if (!inherits(mutationdf, "try-error")) {
-    Chromosome <- as.vector(mutationdf[,chrindex])
+  if(!inherits(variantdf, "try-error")) {
+    Chromosome <- as.vector(variantdf[,chrindex])
     Chromosome <- gsub("chr","",Chromosome,ignore.case = TRUE)
-    Position <- as.vector(mutationdf[,posindex])
-    Frequency <- as.numeric(gsub("%","",as.vector(mutationdf[,freqindex])))
+    Position <- as.vector(variantdf[,posindex])
+    if(!missing(altreadsindex)){
+      altreads <- round(as.vector(variantdf[,altreadsindex]))
+      if(!missing(freqindex)) {
+        Frequency <- as.numeric(gsub("%","",as.vector(variantdf[,freqindex])))
+        if(!missing(totalreadsindex)) {
+          totalreads <- round(as.vector(variantdf[,totalreadsindex]))
+        } else {
+          totalreads <- round(altreads*100/Frequency)
+        }
+        
+      } else if(!missing(totalreadsindex)) {
+        totalreads <- round(as.vector(variantdf[,totalreadsindex]))
+        Frequency <- 100*altreads/totalreads
+      } else if(!missing(refreadsindex)){
+        refreads <- round(as.vector(variantdf[,refreadsindex]))
+        totalreads <- round(refreads+altreads)
+        Frequency <- 100*altreads/totalreads
+      } else {
+        stop("Insufficient input data: supply variant frequency, total reads, or reference reads")
+      }
+    } else if(!missing(freqindex)&&missing(totalreadsindex)) {
+      if (confidencelevel != FALSE) {
+        warning("Not enough information for estimating confidence intervals")
+      }
+      confidencelevel <- FALSE
+      Frequency <- as.numeric(gsub("%","",as.vector(variantdf[,freqindex])))
+    } else if(!missing(freqindex)&&!missing(totalreadsindex)) {
+      Frequency <- as.numeric(gsub("%","",as.vector(variantdf[,freqindex])))
+      totalreads <- round(as.vector(variantdf[,totalreadsindex]))
+      altreads <- round((Frequency/100)*totalreads)
+    } else {
+      stop("This function requires SOME kind of input data")
+    }
+    
     Copynumbers <- c()
-    Mutant_copies <- c()
+    Variant_copies <- c()
+    Variant_copies_low <- c()
+    Variant_copies_high <- c()
+    if (confidencelevel != FALSE) {
+      ci <- apply(cbind(altreads,totalreads), 1, function(x) {
+        binom.test(x[1], x[2], conf.level = confidencelevel)$conf.int })
+      Frequency_low <- 100*ci[1,]
+      Frequency_high <- 100*ci[2,]
+    }
+    
     if(length(Chromosome!=0)) {
-      for (s in 1:length(Chromosome)) {
+      for (s in seq_along(Chromosome)) {
         cn <- segmentdf$Segment_Mean2[Chromosome[s] == segmentdf$Chromosome & Position[s] >= segmentdf$Start & Position[s] <= segmentdf$End]
         if(length(cn)==1){
           Copynumbers[s] <- cn
-          Mutant_copies[s] <- (Frequency[s]/100)*(cn-2+2/cellularity)
+          if (hetSNPs == TRUE) {
+            Variant_copies[s] <- (Frequency[s]/100)*(cn-2+2/cellularity) - (1/cellularity - 1)
+            if (confidencelevel != FALSE) {
+              Variant_copies_low[s] <- (Frequency_low[s]/100)*(cn-2+2/cellularity) - (1/cellularity - 1)
+              Variant_copies_high[s] <- (Frequency_high[s]/100)*(cn-2+2/cellularity) - (1/cellularity - 1)
+            }
+          } else {
+            Variant_copies[s] <- (Frequency[s]/100)*(cn-2+2/cellularity)
+            if (confidencelevel != FALSE) {
+              Variant_copies_low[s] <- (Frequency_low[s]/100)*(cn-2+2/cellularity)
+              Variant_copies_high[s] <- (Frequency_high[s]/100)*(cn-2+2/cellularity)
+            }
+          }
         } else {
           Copynumbers[s] <- NA
-          Mutant_copies[s] <- NA
+          Variant_copies[s] <- NA
+          if (confidencelevel != FALSE) {
+            Variant_copies_low[s] <- NA
+            Variant_copies_high[s] <- NA
+          }
         }
       }
     }
-    #Mutant_copies <- (Frequency/100)*(Copynumbers-2)+0.02*Frequency/cellularity
+    
     if(append==TRUE){
-      output <- mutationdf
+      output <- variantdf
       output$Copynumbers <- Copynumbers
-      output$Mutant_copies <- Mutant_copies
-    } else {output <- data.frame(Chromosome,Position,Frequency,Copynumbers,Mutant_copies)}
+      if (confidencelevel != FALSE) {
+        output$Frequency_low <- Frequency_low
+        output$Frequency_high <- Frequency_high
+      }
+      output$Variant_copies <- Variant_copies
+      if (confidencelevel != FALSE) {
+        output$Variant_copies_low <- Variant_copies_low
+        output$Variant_copies_high <- Variant_copies_high
+      }
+    } else if (confidencelevel == FALSE){output <- data.frame(Chromosome,Position,Frequency,
+                                                              Copynumbers,Variant_copies)
+    } else {output <- data.frame(Chromosome,Position,Frequency,Frequency_low,Frequency_high,
+                                 Copynumbers,Variant_copies,Variant_copies_low,Variant_copies_high)}
     if(writefiles) {
       if (missing(outputdir)) {
         fn <- gsub(".csv","_ACE.csv",filename)
@@ -791,34 +868,27 @@ linkmutationdata <- function(mutationdf, segmentdf, cellularity = 1,chrindex=1,p
       }
     } 
     return(output)
-  } else {print(paste0("failed to link mutation data for ", filename))}
+  } else {print(paste0("failed to link variant data for ", filename))}
 }
 
-# This is the most involving function from the user perspective: it processes estimated segment copynumbers and links mutationdata for an entire QDNAseq-object
-# Additionally, you can print the plots of all selected models: the function will save the plots in a list and return the list
-# The function needs models for all individual samples in the object you want analyzed
-# This should be supplied by the user as a tab-delimited text with sample name, cellularity, ploidy, and standard
-# If ploidy and standard are not given, they are assumed to be 2 and 1 respectively. Makes sure this holds true!
-# Linking mutation data is optional; you can also use this function if you only want to output the segment files or get new plots
-# You can set printsegmentfiles and printnewplots to FALSE to reduce output
-# The argument mutationdata expects a directory path, e.g. "./" or "/vcf/mutationdata/"
-# The directory should contain files that have the sample name in them, and end with .csv, .txt, .tsv or .xls (but all the same!)
-# If the files have a prefix or postfix (such as mutations_sample.txt or sample_SNVs.csv), you specify this with the respective arguments
-# copyNumbersSegmented can either be a QDNAseq-object already loaded into R or a file path to an RDS-file of the object
-# trncname: get rid of everything from and including the underscore (or a custom regex) in the samplename; make sure it still matches the sample names in the mutation files!
-# dontmatchnames: if you set this to TRUE, the function will just use the sample number in the QDNAseq-object as the row number in the modelsfile. Risky!
-# inputdir is a bit of a convenience function. You can give a file path, and the function will look for the appropriate files there. 
-#   It will still check for the first arguments, which will take priority over anything it finds in the directory. 
-#   If not specified, it will look for a subdirectory mutationdata, if it doesn't find it, it will assume the files are in the inputdir
-#   If it doesn't find the mutationdata, it should give the appropriate error
-#   The models need to be in "models.txt" or otherwise specified
-#   If not specified, it will open the first rds-file it finds in the inputdir: it will warn if it finds more than one rds-file, but still use the first!
-# outputdir is there to make sure all your output ends in this directory, it will give mutationdata and segmentfiles in separate subdirectories
-#   Specify the entire path for outputdir! By default it will make folders in your active working directory, not inputdir!
+# YES! This monstruous function had to be updated due to the new and improved 
+# linkvariants function, a more-is-better version of linkmutationdata that also 
+# provides confidence intervals and the option to analyze heterozygous germline 
+# variants. The changes to postanalysisloop are quite subtle, but a lot of new 
+# arguments were necessary to accomodate linkvariants. These arguments are 
+# generally only used in the linkvariants call, so consult linkvariants 
+# documentation for those arguments! Note that the default for confidencelevel 
+# is FALSE in this function, so you will not get the confidence intervals, even 
+# if you provide read counts, unless you specify the confidence level (e.g. 0.95
+# for 95% CI). One other notable change is that I have changed the argument
+# mutationdata to variantdata, and it now thinks it should look for the
+# directory "variantdata" instead. Of course, as before, you can specify the
+# name of the directory!
 
-postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix="",postfix="",trncname=FALSE,inputdir=FALSE,
-                             chrindex=1,posindex=2,freqindex=3,append=TRUE,dontmatchnames=FALSE,
-                             printsegmentfiles=TRUE,printnewplots=TRUE,imagetype='pdf',outputdir="./",log=FALSE, segext='tsv'){
+postanalysisloop <- function(copyNumbersSegmented,modelsfile,variantdata,prefix="",postfix="",trncname=FALSE,inputdir=FALSE,
+                             hetSNPs=FALSE,chrindex=1,posindex=2,freqindex=3,altreadsindex,totalreadsindex,refreadsindex,
+                             confidencelevel=FALSE,append=TRUE,dontmatchnames=FALSE,printsegmentfiles=TRUE,printnewplots=TRUE,
+                             imagetype='pdf',outputdir="./",log=FALSE, segext='tsv') {
   if(!dir.exists(outputdir)) {dir.create(outputdir)}
   if(inputdir!=FALSE){
     if(missing(copyNumbersSegmented)) {
@@ -830,32 +900,33 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
     if(missing(modelsfile)){models <- try(read.table(file.path(inputdir,"models.tsv"), header = TRUE, comment.char = "", sep = "\t"))
     } else {models <- read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t")}
     if(inherits(models, "try-error")) {print("failed to read modelsfile")}
-    if(missing(mutationdata)) {
-      if (dir.exists(file.path(inputdir,"mutationdata"))) {
-        mutationdata <- file.path(inputdir,"mutationdata")
-      } else { mutationdata <- inputdir}
+    if(missing(variantdata)) {
+      if (dir.exists(file.path(inputdir,"variantdata"))) {
+        variantdata <- file.path(inputdir,"variantdata")
+      } else { variantdata <- inputdir}
     }
   }
   if(missing(copyNumbersSegmented)){print("this function requires a QDNAseq-object")}
   if(is(copyNumbersSegmented, "character")) {copyNumbersSegmented <- try(readRDS(copyNumbersSegmented))}
   if(inherits(copyNumbersSegmented, "try-error")) {print("failed to read RDS-file")}
   if(missing(modelsfile)&&inputdir==FALSE){print("this function requires a tab-delimited file with model information per sample")}
-  if(!missing(modelsfile)&&is(modelsfile, "character")) {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t"))}
+  if(!missing(modelsfile)&&is(modelsfile, "character")) {models <- try(read.table(modelsfile, header = TRUE, comment.char = "", sep = "\t"))
+  } else {models <- modelsfile}
   if(inherits(models, "try-error")) {print("failed to read modelsfile")}
-  if(missing(mutationdata)){print("not linking mutation data")}
-  if(!missing(mutationdata)) {
-    if (length(list.files(mutationdata, pattern = "\\.csv$"))>0) {mutext<-".csv"
-  } else if (length(list.files(mutationdata, pattern = "\\.txt$"))>0) {mutext<-".txt"
-  } else if (length(list.files(mutationdata, pattern = "\\.tsv$"))>0) {mutext<-".tsv"
-  } else if (length(list.files(mutationdata, pattern = "\\.xls$"))>0) {mutext<-".xls"
-  } else {print("file extension of mutation files not supported: use .csv, .txt, .tsv, or .xls")}
+  if(missing(variantdata)){print("not linking variant data")}
+  if(!missing(variantdata)) {
+    if (length(list.files(variantdata, pattern = "\\.csv$"))>0) {varext<-".csv"
+    } else if (length(list.files(variantdata, pattern = "\\.txt$"))>0) {varext<-".txt"
+    } else if (length(list.files(variantdata, pattern = "\\.tsv$"))>0) {varext<-".tsv"
+    } else if (length(list.files(variantdata, pattern = "\\.xls$"))>0) {varext<-".xls"
+    } else {print("file extension of variant files not supported: use .csv, .txt, .tsv, or .xls")}
   }
   fd <- Biobase::fData(copyNumbersSegmented)
   pd <- Biobase::pData(copyNumbersSegmented)
   if(trncname==TRUE) {pd$name <- gsub("_.*","",pd$name)}
   if(trncname!=TRUE&&trncname!=FALSE) {pd$name <- gsub(trncname,"",pd$name)}
   newplots <- vector(mode = 'list', length = (length(pd$name)))
-  for (a in 1:length(pd$name)) {
+  for (a in seq_along(pd$name)) {
     if(dontmatchnames==TRUE) { currentindex <- a
     } else { currentindex <- which(models[,1]==pd$name[a]) }
     if(length(currentindex)==1){
@@ -874,8 +945,8 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
         }
         standard <- as.numeric(models[currentindex,4])
         if(is.na(standard)||length(standard)==0) {
-          print(paste0("standard assumed 1 for ", pd$name[a]))
-          standard <- 1
+          print(paste0("standard calculated from data for ", pd$name[a]))
+          standard <- "standard"
         }
         newplots[[a]] <- singleplot(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a,title=pd$name[a])
         imagefunction <- get(imagetype)
@@ -892,10 +963,13 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
           }
         }
         segmentdf <- getadjustedsegments(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a,log=log)
-        if(!missing(mutationdata)) {
-          mutationfile <- file.path(mutationdata,paste0(prefix,pd$name[a],postfix,mutext))
-          folder <- file.path(outputdir,"mutationdata")
-          linkmutationdata(mutationfile,segmentdf,cellularity,chrindex,posindex,freqindex,append,outputdir=folder)
+        if(!missing(variantdata)) {
+          variantfile <- file.path(variantdata,paste0(prefix,pd$name[a],postfix,varext))
+          folder <- file.path(outputdir,"variantdata")
+          if(file.exists(variantfile)) {
+            linkvariants(variantfile,segmentdf,cellularity,hetSNPs,chrindex,posindex,freqindex,altreadsindex,
+                         totalreadsindex,refreadsindex,confidencelevel,append,outputdir=folder)
+          } else {warning(paste0("Cannot find file ", variantfile))}
         }
         if(printsegmentfiles==TRUE){
           if (!dir.exists(file.path(outputdir,"segmentfiles"))) {dir.create(file.path(outputdir,"segmentfiles"))}
@@ -916,7 +990,7 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,mutationdata,prefix
 analyzegenomiclocations <- function(segmentdf, Chromosome, Position, Frequency, cellularity){
   Copynumbers <- c()
   if(!missing(Frequency)){Mutant_copies <- c()}
-  for (s in 1:length(Chromosome)) {
+  for (s in seq_along(Chromosome)) {
     cn <- segmentdf$Segment_Mean2[Chromosome[s] == segmentdf$Chromosome & Position[s] >= segmentdf$Start & Position[s] <= segmentdf$End]
     if(length(cn)==1){
       Copynumbers[s] <- cn

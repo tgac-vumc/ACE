@@ -37,21 +37,42 @@ ACE is a an absolute copy number estimator that scales copy number data to fit w
 
 # Running ACE
 
+## Installation
+
+ACE is available through Bioconductor. In R, enter the commands:
+
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+# biocLite()
+biocLite("ACE")
+```
+
+The development version of ACE will be available on GitHub and can be installed as follows:
+
+```{r, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("tgac-vumc/ACE")
+```
+
+
 ## Getting started
 
 The ACE package includes segmented data derived from low-coverage whole genome sequencing, which will be used throughout this vignette. The mapped sequencing data has been processed through the QDNAseq package. Users of ACE, however, are most likely to start from their own bam-files, not the pre-processed segmented data. runACE, the core functionality of ACE, will run a default set of QDNAseq functions if bam-files are provided as the data source (make sure the genome builds correspond, I cannot stress this enough). If you wish to run the code below, make sure the file paths are correct. To get started, I recommend using a directory that only contains a few bam-files. The function runACE is designed to automatically analyze all samples in a directory. Input should be either segmented QDNAseq-objects or aligned bam-files. For details on all arguments, consult the runACE documentation. Let's get started! 
 
 ```{r, eval = FALSE}
-userpath <- "D:/DATA/bam-files"
-# if you do not want the output in the same directory, use the argument outputdir
-runACE(userpath, filetype='bam', binsizes = c(100, 1000), ploidies = c(2,4), imagetype='png')
+# specify the directory containing your bam-files
+userpath <- tempdir()
+# if you do not want the output in the same directory, use argument outputdir
+runACE(userpath, filetype='bam', binsizes = c(100, 1000), 
+       ploidies = c(2,4), imagetype='png')
 ```
 
 If you do not have aligned bam-files ready to go, you can use the data provided in the package:
 
 ```{r, eval = FALSE}
 data("copyNumbersSegmented")
-userpath <- "D:/DATA/ACE"
+# specify the directory in which to create the output
+userpath <- tempdir()
 saveRDS(file.path(userpath,"copyNumbersSegmented.rds"))
 runACE(userpath, filetype='rds', ploidies = c(2,4), imagetype='png')
 ```
@@ -96,7 +117,7 @@ In the two examples given below, it is quite obvious what the most likely approp
 
 To reproduce some of the output created by runACE (which is only written to file), I have included the following code. The functions used will be explained in more detail later:
 
-```{r, fig.show='hold'}
+```{r}
 data("copyNumbersSegmented")
 object <- copyNumbersSegmented
 model1 <- singlemodel(object, QDNAseqobjectsample = 1)
@@ -104,27 +125,21 @@ bestfit1 <- model1$minima[tail(which(model1$rerror==min(model1$rerror)), 1)]
 besterror1 <- min(model1$rerror)
 lastfit1 <- tail(model1$minima, 1)
 lasterror1 <- tail(model1$rerror, 1)
-plot1 <- singleplot(object, QDNAseqobjectsample = 1, cellularity = bestfit1, 
-                    error = besterror1, standard = model1$standard, 
-                    title = "sample1 - binsize 1000 kbp - 379776 reads - 2N fit 1")
-plot2 <- singleplot(object, QDNAseqobjectsample = 1, cellularity = lastfit1, 
-                    error = lasterror1, standard = model1$standard, 
-                    title = "sample1 - binsize 1000 kbp - 379776 reads - 2N fit 7")
-plot3 <- model1$errorplot + ggtitle("sample1 - errorlist") + 
+singleplot(object, QDNAseqobjectsample = 1, cellularity = bestfit1, 
+           error = besterror1, standard = model1$standard, 
+           title = "sample1 - binsize 1000 kbp - 379776 reads - 2N fit 1")
+singleplot(object, QDNAseqobjectsample = 1, cellularity = lastfit1, 
+           error = lasterror1, standard = model1$standard, 
+           title = "sample1 - binsize 1000 kbp - 379776 reads - 2N fit 7")
+model1$errorplot + ggtitle("sample1 - errorlist") + 
   theme(plot.title = element_text(hjust = 0.5))
 model2 <- singlemodel(object, QDNAseqobjectsample = 2)
-plot4 <- singleplot(object, QDNAseqobjectsample = 2, 0.38, 0.183, 
-                    title = "sample2 - binsize 1000 kbp - 369331 reads - 2N fit 3")
-plot5 <- singleplot(object, QDNAseqobjectsample = 2, 0.94, 0.998, 
-                    title = "sample2 - binsize 1000 kbp - 369331 reads - 2N fit 6")
-plot6 <- model2$errorplot +	ggtitle("sample2 - errorlist") + 
+singleplot(object, QDNAseqobjectsample = 2, 0.38, 0.183, 
+           title = "sample2 - binsize 1000 kbp - 369331 reads - 2N fit 3")
+singleplot(object, QDNAseqobjectsample = 2, 0.94, 0.998, 
+           title = "sample2 - binsize 1000 kbp - 369331 reads - 2N fit 6")
+model2$errorplot +	ggtitle("sample2 - errorlist") + 
   theme(plot.title = element_text(hjust = 0.5))
-plot1
-plot2
-plot3
-plot4
-plot5
-plot6
 ```
 
 So this should allow you to find the "easy" fits, what about those tricky ones?
@@ -184,7 +199,7 @@ singleplot(template, cellularity = 0.46, ploidy = 2, standard = 0.8105095)
 # Note that I can directly use the template for the singlemodel and singleplot functions
 ```
 
-Instead of tinkering with the standard and ploidy, you can also forget about the standard, and fit any possible ploidy to segment value 1 (make sure your segmented data is normalized to 1). This is what the function squaremodel allows you to do. Instead of the boring error plots, you now get a colorful view of the relative error as a function of both ploidy and cellularity! Awesome! User beware though. You'll find ACE can make great fits at interesting ploidies, but they often don't make sense from a biological perspective. On top of the penalty for low cellularities, you can consider to use a penalty for ploidies (penploidy) that diverge a lot from two. All that trickiness urges me to advise against the use of this function as the primary means of finding fits. That, and the fact that the function takes more time to compute. Instead, use it to troubleshoot difficult samples or create visually appealing output to impress your colleagues. The function has some options to specify the range of ploidy (ptop and pbottom) and the resolution on the y-axis (prows).
+Instead of tinkering with the standard and ploidy, you can also let ACE find the ploidy that matches the standard. This is what the function squaremodel allows you to do. Instead of the boring error plots, you now get a colorful view of the relative error as a function of both ploidy and cellularity! Awesome! User beware though. You'll find that ACE can make great fits at interesting ploidies, but they may not always make sense from a biological perspective. On top of the penalty for low cellularities, you can consider to use a penalty for ploidies (penploidy) that diverge a lot from two. All that trickiness urges me to advise against the use of this function as the primary means of finding fits. That, and the fact that the function takes more time to compute. Instead, use it to troubleshoot difficult samples or create visually appealing output to impress your colleagues. The function has some options to specify the range of ploidy (ptop and pbottom) and the resolution on the y-axis (prows).
 
 ```{r}
 # Let's continue with the template we made for sample 2, and just see what happens...
@@ -210,11 +225,9 @@ sqmodel$matrixplot
 # much longer to run, it will start distinguishing minima that correspond with
 # basically the same model.
 head(sqmodel$minimadf, 10)
-singleplot(template, cellularity = 0.41, ploidy = 2.08, standard = 1)
+singleplot(template, cellularity = 0.41, ploidy = 2.08)
 # Perhaps this fit is a little bit better than our original 2N fit, 
 # but the difference is negligible.
-# Don't forget: standard for squaremodel is by definition 1, but you have to
-# specify this in the singleplot function call!
 ```
 
 This gives you all the tools to find the right fit, and customize your data and plots!
@@ -234,12 +247,12 @@ head(segmentdf)
 
 The first five columns are basically what you need as input for ABSOLUTE when it comes to segment data (although for ABSOLUTE you will need to run the function with argument log=TRUE). Again, keep in mind that the genomic locations of the segments are associated with a certain genome build. The first segment mean is the adjusted value calculated from the QDNAseq value. The second segment mean is manually calculated from the adjusted copy number values of the individual bins. I do not know why they are different, but luckily the difference is pretty marginal. Those individual bin values allow us to calculate the standard error of a segment value. This error can be useful to make statements about the subclonality of a segment. I have calculated a P-value, which is the chance that, if the segment had a real value that is the closest integer copy number, it would end up with a segment mean as extreme as seen in Segment_Mean2. This P-value must be interpreted with EXTREME caution, because certain biases can easily create very low P-values.
 
-## linkmutationdata
+## linkvariants
 
-Imagine we also have mutation data available for these samples. You can use this function to append the segment data at the genomic locations of the mutations. That's already pretty cool, but this function also calculates how many mutant copies it thinks there are, using the mutation frequency. Programs I use have these frequencies represented as percentages, not fractions. If the mutant copies don't make sense, try multiplying with 100.
+Imagine we also have mutation data available for these samples. You can use this function to append the segment data at the genomic locations of the mutations. That's already pretty cool, but this function also calculates how many mutant copies it thinks there are, using the mutation frequency. Programs I use have these frequencies represented as percentages, not fractions. If the mutant copies don't make sense, try multiplying with 100. If you also supply read depth, you can calculate confidence intervals for frequency and mutant copies. You can also use this function to determine copies of heterozygous germline variants. Use help(linkvariants) for further documentation.
 
 ```{r}
-# Luck has it, we actually have mutation data for these samples. Back luck has
+# Luck has it, we actually have mutation data for these samples. Bad luck has
 # it, quality was very low, so calculated mutant copies are not very precise. 
 # We use the segment data frame created in the previous section. 
 # Mutation data can be provided as a file or as a data frame. The result will be 
@@ -249,12 +262,12 @@ Gene <- c("CASP8", "CDKN2A", "TP53")
 Chromosome <- c(2, 9, 17)
 Position <- c(202149589, 21971186, 7574003)
 Frequency <- c(47.46, 36.28, 43.48)
-mutationdf <- data.frame(Gene, Chromosome, Position, Frequency)
-linkmutationdata(mutationdf, segmentdf, cellularity = 0.38, 
+variantdf <- data.frame(Gene, Chromosome, Position, Frequency)
+linkvariants(variantdf, segmentdf, cellularity = 0.38, 
                  chrindex = 2, posindex = 3, freqindex = 4)
 ```
 
-As mentioned, the mutation data for both samples was appalling, so don't be discouraged :-) You'll do better. Keep in mind that the program assumes the mutations only occur in tumor cells. Be sure to filter out your SNPs!
+As mentioned, the mutation data for both samples was appalling, so don't be discouraged :-) You'll do better. Keep in mind that the program assumes the mutations only occur in tumor cells. Be sure to filter out your SNPs, and analyze those separately using the argument hetSNPs = TRUE!
 
 ## analyzegenomiclocations
 
@@ -284,11 +297,11 @@ analyzegenomiclocations(segmentdf=segmentdf, cellularity = 0.38,
 
 ## postanalysisloop
 
-This function was created to automate the above functions in case of larger data sets. You need to have picked your best fits, and recorded the variables cellularity, ploidy, and standard. The last two have defaults, namely 2 and 1. If you don't specify them, make sure the defaults are actually correct. Short description of the default functionality (for the full run-down, consult the function documentation). The function loops through a QDNAseq-object. For each sample, it will try to find the model variables by looking through the models-file's first column. Using the variables, it will calculate adjusted segments and link the mutation data. It will also print new plots for the models, which are returned by the function in a list. Output of this function is always written to disk. You can adjust the code below to run it locally.
+This function was created to automate the above functions in case of larger data sets. You need to have picked your best fits, and recorded the variables cellularity, ploidy, and standard. If ploidy is not given, it will default to 2. If standard is not given, it will retrieve it from the QDNAseq-object. Short description of the default functionality (for the full run-down, consult the function documentation). The function loops through a QDNAseq-object. For each sample, it will try to find the model variables by looking through the models-file's first column. Using the variables, it will calculate adjusted segments and link the mutation data. It will also print new plots for the models, which are returned by the function in a list. Output of this function is generally written to disk, although you can use it to just capture all the copy number plots in a list. You can adjust the code below to run it locally.
 
 ```{r, eval = FALSE}
 # Set the correct path
-userpath <- "D:/DATA/ACE"
+userpath <- tempdir()
 # This function needs a models-file, which should like like this
 sample <- c("sample1", "sample2")
 cellularity <- c(0.79, 0.38)

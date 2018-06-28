@@ -13,8 +13,8 @@ Model fitting and production of all output files (except "parameters.tsv") is
 executed by \code{ploidyplotloop}, which handles one QDNAseq-object at a time. 
 }
 \usage{
-runACE(inputdir = "./", outputdir, filetype = 'rds', binsizes, 
-  ploidies = 2, imagetype = 'pdf', method = 'RMSE', penalty = 0, 
+runACE(inputdir = "./", outputdir, filetype = 'rds', genome = 'hg19',
+  binsizes, ploidies = 2, imagetype = 'pdf', method = 'RMSE', penalty = 0, 
   cap = 12, bottom = 0, trncname = FALSE, printsummaries = TRUE, 
   autopick = FALSE)
   
@@ -29,7 +29,8 @@ ploidyplotloop(copyNumbersSegmented, currentdir, ploidies = 2,
   \item{copyNumbersSegmented}{QDNAseq-object with segmented data}
   \item{outputdir, currentdir}{Character string specifying the directory to which ACE should write the output. When missing, ACE will try to write to inputdir. For ploidyplotloop, currentdir is required.}
   \item{filetype}{Character string specifying the file type of your input, either "bam" or "rds". Default = "rds"}
-  \item{binsizes}{Numeric vector, specifying which binsizes (in kbp) to analyze. Possible values are 1, 5, 10, 15, 30, 50, 100, 500, and 1000. Default = c(30,100,500,1000)}
+  \item{genome}{Character string specifying genome and version. Availability depends on QDNAseq. Default = "hg19"}
+  \item{binsizes}{Numeric vector, specifying which binsizes (in kbp) to analyze. Possible values are 1, 5, 10, 15, 30, 50, 100, 500, and 1000. When omitted, defaults to c(100,500,1000)}
   \item{ploidies}{Numeric vector, specifying which ploidies (N) to analyze. Use positive natural numbers. Default = 2}
   \item{imagetype}{Character string specifying the image type graphics device, default = "pdf"}
   \item{method}{Character string specifying what error method to use. See also section "Error methods". Default = "RMSE"}

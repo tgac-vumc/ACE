@@ -36,7 +36,7 @@ Chromosome, Position, and Frequency can be single values or vectors. In the latt
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{getadjustedsegments}}, \code{\link{linkmutationdata}}
+\code{\link{getadjustedsegments}}, \code{\link{linkvariants}}
 }
 \examples{
 ## using segmented data from a QDNAseq-object
