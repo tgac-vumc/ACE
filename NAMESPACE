@@ -12,7 +12,7 @@ importMethodsFrom(Biobase, AnnotatedDataFrame, assayData, classVersion, fData,
 
 importFrom(Biobase, assayDataElement, "assayDataElement<-",
     assayDataElementNames, assayDataElementReplace, assayDataNew, sampleNames)
-importFrom(stats, sd, cor, t.test, wilcox.test, median, mad, pnorm, rnorm, p.adjust, na.exclude)
+importFrom(stats, sd, cor, t.test, wilcox.test, median, mad, pnorm, rnorm, p.adjust, na.exclude, binom.test)
 importFrom(utils, data, maintainer, packageVersion, read.table, write.table, tail)
 importFrom(grDevices, dev.off, pdf, png)
 importFrom(methods, is)
@@ -33,7 +33,7 @@ export("singleplot")
 export("analyzegenomiclocations")
 export("getadjustedsegments")
 export("objectsampletotemplate")
-export("linkmutationdata")
+export("linkvariants")
 export("postanalysisloop")
 export("twosamplecompare")
 export("ACEcall")

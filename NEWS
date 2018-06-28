@@ -1,3 +1,17 @@
+Changes in version 0.99.4 (2018-06-26)
+-------------------------------------
+
+IMPROVEMENTS
+
+    o changed linkmutationdata to linkvariants
+	o linkvariants can estimate copies of heterozygous germline variants
+	o linkvariants calculates the upper and lower bound of a given confidence level when read depth is given
+	o changed postanalysisloop to accommodate linkvariants
+	o added argument in runACE to specify genome build
+	o several minor documentation amendments
+	o improved coding robustness using seq and seq_along functions
+
+
 Changes in version 0.99.0 (2018-05-24)
 -------------------------------------
 
