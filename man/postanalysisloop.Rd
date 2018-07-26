@@ -10,7 +10,7 @@ When models have been chosen for all (or just multiple) samples in a QDNAseq-obj
 \usage{
 postanalysisloop(copyNumbersSegmented, modelsfile, variantdata, 
                  prefix="", postfix="", trncname=FALSE, inputdir=FALSE,
-                 hetSNPs=FALSE, chrindex=1, posindex=2, freqindex=3,
+                 hetSNPs=FALSE, chrindex=1, posindex=2, freqindex,
                  altreadsindex, totalreadsindex, refreadsindex,
                  confidencelevel=FALSE, append=TRUE,
                  dontmatchnames=FALSE, printsegmentfiles=TRUE,
@@ -29,7 +29,7 @@ postanalysisloop(copyNumbersSegmented, modelsfile, variantdata,
   \item{hetSNPs}{Logical. If TRUE, half of the germline copies are assumed to be variant. Default = FALSE}
   \item{chrindex}{Integer. Column index in input file specifying the chromosome associated with the genomic location. Default = 1}
   \item{posindex}{Integer. Column index in input file specifying the position on the chromosome associated with the genomic location. Default = 2}
-  \item{freqindex}{Integer. Column index in input file specifying the frequency (as a percentage) of the variant. Default = 3}
+  \item{freqindex}{Integer. Column index in input file specifying the frequency (as a percentage) of the variant}
   \item{altreadsindex}{Integer. Column index in input file specifying the number of variant-supporting reads}
   \item{totalreadsindex}{Integer. Column index in input file specifying the read depth at the genomic location of the variant}
   \item{refreadsindex}{Integer. Column index in input file specifying the number of reference-supporting reads}

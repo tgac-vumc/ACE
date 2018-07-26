@@ -746,7 +746,7 @@ getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellulari
 # calculate upper and lower bounds of the chosen confidence level.
 
 linkvariants <- function(variantdf, segmentdf, cellularity = 1, hetSNPs = FALSE,
-                         chrindex=1,posindex=2,freqindex=3,altreadsindex,
+                         chrindex=1,posindex=2,freqindex,altreadsindex,
                          totalreadsindex,refreadsindex,confidencelevel=FALSE,
                          append=TRUE, outputdir){
   if(is(variantdf, "character")) {
@@ -886,7 +886,7 @@ linkvariants <- function(variantdf, segmentdf, cellularity = 1, hetSNPs = FALSE,
 # name of the directory!
 
 postanalysisloop <- function(copyNumbersSegmented,modelsfile,variantdata,prefix="",postfix="",trncname=FALSE,inputdir=FALSE,
-                             hetSNPs=FALSE,chrindex=1,posindex=2,freqindex=3,altreadsindex,totalreadsindex,refreadsindex,
+                             hetSNPs=FALSE,chrindex=1,posindex=2,freqindex,altreadsindex,totalreadsindex,refreadsindex,
                              confidencelevel=FALSE,append=TRUE,dontmatchnames=FALSE,printsegmentfiles=TRUE,printnewplots=TRUE,
                              imagetype='pdf',outputdir="./",log=FALSE, segext='tsv') {
   if(!dir.exists(outputdir)) {dir.create(outputdir)}
