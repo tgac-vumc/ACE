@@ -8,9 +8,10 @@ This readme only contains an executive summary of ACE. You can read the accompan
 
 ACE is an R package. It will become available via Bioconductor. If it is, the following commands will install ACE into R:
 
-source("https://bioconductor.org/biocLite.R")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
 
-biocLite("HMMcopy")
+BiocManager::install("HMMcopy")
 
 If it is not yet available, or you wish to use the development version, you can install ACE directly using the devtools package:
 

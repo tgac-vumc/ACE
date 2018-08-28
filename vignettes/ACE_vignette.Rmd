@@ -42,9 +42,10 @@ ACE is a an absolute copy number estimator that scales copy number data to fit w
 ACE is available through Bioconductor. In R, enter the commands:
 
 ```{r, eval = FALSE}
-source("https://bioconductor.org/biocLite.R")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
 # biocLite()
-biocLite("ACE")
+BiocManager::install("ACE")
 ```
 
 The development version of ACE will be available on GitHub and can be installed as follows:
