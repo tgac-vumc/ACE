@@ -510,7 +510,7 @@ squaremodelsummary <- function(template,QDNAseqobjectsample=FALSE,squaremodel,sa
   if (cnplots!=0) {
     for (i in seq(1,cnplots)) {
       index <- tail(which(squaremodel$minimadf$error==unique(sort(squaremodel$minimadf$error))[i]),1)
-      plots[[1+i]] <- singleplot(template=template,QDNAseqobjectsample=QDNAseqobjectsample,standard=1,
+      plots[[1+i]] <- singleplot(template=template,QDNAseqobjectsample=QDNAseqobjectsample,
                                  cellularity=squaremodel$minimadf$cellularity[index],
                                  error=squaremodel$minimadf$error[index],
                                  ploidy=squaremodel$minimadf$ploidy[index],
