@@ -44,7 +44,7 @@ ACE is available through Bioconductor. In R, enter the commands:
 ```{r, eval = FALSE}
 if (!requireNamespace("BiocManager", quietly=TRUE))
     install.packages("BiocManager")
-# biocLite()
+# BiocManager::install()
 BiocManager::install("ACE")
 ```
 
