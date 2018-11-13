@@ -5,6 +5,7 @@
 importClassesFrom(Biobase, AnnotatedDataFrame, AssayData, eSet, MIAxE,
     Versioned, VersionedBiobase, Versions)
 importClassesFrom(QDNAseq, QDNAseqCopyNumbers, QDNAseqReadCounts)
+importClassesFrom(GenomicRanges, GRanges)
 
 importMethodsFrom(Biobase, AnnotatedDataFrame, assayData, classVersion, fData,
     "fData<-", featureData, featureNames, pData, "pData<-", phenoData,
@@ -44,6 +45,7 @@ export("segmentstotemplate")
 export("compresstemplate")
 export("correlationmatrix")
 export("correlationmatrixadjusted")
+export("forcesegmentsontemplate")
 
 
 # EOF

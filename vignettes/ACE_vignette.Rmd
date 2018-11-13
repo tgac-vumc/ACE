@@ -389,12 +389,12 @@ sms[[3]]
 
 ### loopsquaremodel
 
-This function makes squaremodels for all samples in a QDNAseq-object! It can be viewed as the squaremodel equivalent of ploidyplotloop. In contrast though, it is possible to run this function without writing anything to file. It will return a list with the squaremodels. The object summary is a single file with all matrixplots. When printplots = TRUE, the squaremodel summaries are saved to file.
+This function makes squaremodels for all samples in a QDNAseq-object! It can be viewed as the squaremodel equivalent of ploidyplotloop. In contrast though, it is possible to run this function without writing anything to file. It can return a list with the squaremodels, or specific items from the squaremodel (see function documentation). The object summary is a single file with all matrixplots. When printplots = TRUE, the squaremodel summaries are saved to file.
 
 ```{r}
 # I like squaremodels
 lsm <- loopsquaremodel(object, printplots = FALSE, printobjectsummary = FALSE, 
-                       penalty = 0.5, penploidy = 0.5)
+                       penalty = 0.5, penploidy = 0.5, returnmodels = TRUE)
 class(lsm)
 length(lsm)
 class(lsm[[1]])
@@ -412,6 +412,8 @@ segmentstotemplate
 compresstemplate
 
 templatefromequalsegments
+
+forcesegmentsontemplate
 
 # Information
 

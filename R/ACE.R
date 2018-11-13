@@ -155,9 +155,9 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		    else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty)}
   		    else {print("Not a valid method")}
   		  }
-  		  if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
-  		  else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
-  		  else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
+  		  if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(temp*segmentdata$lengths)/sum(segmentdata$lengths))}
+  		  else if(method=='SMRE') {errorlist[i-4] <- sum(temp*segmentdata$lengths)/sum(segmentdata$lengths)^2}
+  		  else if(method=='MAE') {errorlist[i-4] <- sum(temp*segmentdata$lengths)/sum(segmentdata$lengths)}
   		  
   		}
   			
@@ -417,9 +417,9 @@ singlemodel <- function(template,QDNAseqobjectsample = FALSE, ploidy = 2, standa
 		  else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)/(fraction[i-4]^penalty)}
 		  else {print("Not a valid method")}
 		}
-		if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
-		else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
-		else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
+		if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(temp*segmentdata$lengths)/sum(segmentdata$lengths))}
+		else if(method=='SMRE') {errorlist[i-4] <- sum(temp*segmentdata$lengths)/sum(segmentdata$lengths)^2}
+		else if(method=='MAE') {errorlist[i-4] <- sum(temp*segmentdata$lengths)/sum(segmentdata$lengths)}
 		
 	}
 		
@@ -515,9 +515,9 @@ squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5
         else if(method=='MAE') {temp[j] <- min(abs(segmentdata$values[j]-expected),0.5)*(1+abs(ploidy-2))^penploidy/(fraction[i-4]^penalty)}
         else {print("Not a valid method")}
       }
-      if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths))}
-      else if(method=='SMRE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)^2}
-      else if(method=='MAE') {errorlist[i-4] <- sum(rep(temp,segmentdata$lengths))/sum(segmentdata$lengths)}
+      if(method=='RMSE') {errorlist[i-4] <- sqrt(sum(temp*segmentdata$lengths)/sum(segmentdata$lengths))}
+      else if(method=='SMRE') {errorlist[i-4] <- sum(temp*segmentdata$lengths)/sum(segmentdata$lengths)^2}
+      else if(method=='MAE') {errorlist[i-4] <- sum(temp*segmentdata$lengths)/sum(segmentdata$lengths)}
     }
     listofcellularity <- append(listofcellularity, fraction)
     listoferrors <- append(listoferrors, errorlist)

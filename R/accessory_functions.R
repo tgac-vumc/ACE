@@ -541,7 +541,8 @@ squaremodelsummary <- function(template,QDNAseqobjectsample=FALSE,squaremodel,sa
 # loop through all samples of your object and make squaremodel summaries for those
 # since this only works on QDNAseq-objects, I use some of the info in those objects for the filenames and graphs
 loopsquaremodel <- function(object,ptop=5,pbottom=1,prows=100,method='RMSE',penalty=0,penploidy=0,
-                             outputdir,imagetype='pdf',trncname=FALSE, printplots = TRUE, printobjectsummary=TRUE) {
+                            outputdir,imagetype='pdf',trncname=FALSE, returnmodels = FALSE, 
+                            printplots = TRUE, printobjectsummary=TRUE) {
   
   imagefunction <- get(imagetype)
   if (missing(outputdir)) {outputdir<-"."}
@@ -553,17 +554,21 @@ loopsquaremodel <- function(object,ptop=5,pbottom=1,prows=100,method='RMSE',pena
   if(trncname!=FALSE&&trncname!=TRUE) {pd$name <- gsub(trncname,"",pd$name)}
   binsize <- fd$end[1]/1000
   
-  sqmlist <- vector(mode = 'list', length = length(pd$name))
+  if (returnmodels[1] != FALSE) {sqmlist <- vector(mode = 'list', length = length(pd$name))}
   matrixplots <- vector(mode = 'list', length = length(pd$name))
   
   for (i in seq_along(pd$name)) {
     model <- squaremodel(object,QDNAseqobjectsample=i,ptop=ptop,pbottom=pbottom,prows=prows,
                          penalty=penalty,penploidy=penploidy,method=method)
-    sqmlist[[i]]$samplename <- pd$name[i]
-    sqmlist[[i]] <- append(sqmlist[[i]], model)
     sms <- squaremodelsummary(object,model,QDNAseqobjectsample=i,outputdir=outputdir,imagetype=imagetype,trncname=trncname,printplots=printplots)
     matrixplots[[2*(i-1)+1]] <- model$matrixplot + ggtitle(paste0(pd$name[i]))
     matrixplots[[2*(i-1)+2]] <- sms[[2]]
+    if (returnmodels[1] !=  FALSE) {
+      sqmlist[[i]]$samplename <- pd$name[i]
+      if (returnmodels[1] != TRUE) {model <- model[name = returnmodels]}
+      sqmlist[[i]] <- append(sqmlist[[i]], model)
+    }
+    
   }
   
   if(printobjectsummary == TRUE) {
@@ -577,7 +582,7 @@ loopsquaremodel <- function(object,ptop=5,pbottom=1,prows=100,method='RMSE',pena
       dev.off()
     }
   }
-  return(sqmlist)
+  if (returnmodels[1] != FALSE) {return(sqmlist)}
 }
 
 # The first function, correlationmatrix(), is straightforward: it makes a correlation matrix
@@ -785,4 +790,75 @@ templatefromequalsegments <- function(template, QDNAseqobjectsample = FALSE, equ
   template <- data.frame(bin,chr,start,end,copynumbers,segments)
   return(template)
   
+}
+
+# Another function inspired by twosamplecompare! The idea of this one is
+# actually more basic. The name of the function says it all. This time there are
+# two types of input for the segments and an important option. First off: you
+# can give your segments as something like a GRanges object or a data frame
+# obtained from getadjustedsegments, or you can use an ACE template and use that
+# (similar as in twosamplecompare). Second, you now have the option to either
+# only use the segments from the segmentinput, or you combine segments as in
+# twosamplecompare. Another nice feature of this function when compared to
+# twosamplecompare is that you do not have to have equal number of bins, since
+# bins of the segmentinput are ignored: it will just use segment info with
+# "Chromosome", "Start", and "End" specified in aptly named columns. Since you
+# are forcing segments on a template, the template does not need to have segment
+# values itself if combinesegments = FALSE. This functions returns the
+# resegmented template.
+
+forcesegmentsontemplate <- function(segmentinput, template, QDNAseqobjectsample = FALSE, 
+                                    combinesegments = FALSE, funtype = 'mean') {
+    
+    fun <- get(funtype)
+    if (QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
+    if (is(segmentinput, "GRanges")) {
+        segmentdf <- data.frame(Chromosome = GenomicRanges::seqnames(segmentinput),
+                                Start = GenomicRanges::start(segmentinput),
+                                End = GenomicRanges::end(segmentinput))
+    } else if (colnames(segmentinput)[1] == "bin") {
+        segmentdf <- getadjustedsegments(segmentinput)
+    } else {
+        Chromosome <- segmentinput[,grep("chr", colnames(segmentinput), ignore.case = TRUE)[1]]
+        Start <- segmentinput[,grep("start", colnames(segmentinput), ignore.case = TRUE)[1]]
+        End <- segmentinput[,grep("end", colnames(segmentinput), ignore.case = TRUE)[1]]
+        segmentdf <- data.frame(Chromosome, Start, End)
+    }
+    
+    template$chr <- as.vector(gsub("chr", "", template$chr,ignore.case = TRUE))
+    segmentdf$Chromosome <- as.vector(gsub("chr", "", segmentdf$Chromosome,ignore.case = TRUE))
+    
+    if (combinesegments == TRUE) {
+        ownsegments <- getadjustedsegments(template)
+        allsegments <- rbind(segmentdf[, seq(1, 3)], ownsegments[, seq(1, 3)])
+        allsegments <- allsegments[order(allsegments$Chromosome, allsegments$Start, allsegments$End),]
+        Chromosome <- c()
+        Start <- c()
+        End <- c()
+        for (c in rle(as.vector(allsegments$Chromosome))$values) {
+            starts <- sort(unique(allsegments$Start[allsegments$Chromosome == c]))
+            ends <- sort(unique(allsegments$End[allsegments$Chromosome == c]))
+            if (length(starts != length(ends))) {
+                starts <- append(starts, ends[-length(ends)]+1)
+                ends <- append(ends, starts[-1]-1)
+                starts <- sort(unique(starts))
+                ends <- sort(unique(ends))
+            }
+            Chromosome <- append(Chromosome, rep(c, length(starts)))
+            Start <- append(Start, starts)
+            End <- append(End, ends)
+        }
+        segmentdf <- data.frame(Chromosome, Start, End)
+    }
+    
+    template$segments <- NA
+    
+    for (s in seq_along(segmentdf$Chromosome)) {
+        indices <- which(template$chr == segmentdf$Chromosome[s] &
+                             template$start >= segmentdf$Start[s] &
+                             template$end <= segmentdf$End[s])
+        template$segments[indices] <- fun(na.exclude(template$copynumbers[indices]))
+    }
+    template$segments[is.na(template$copynumbers)] <- NA
+    return(template)
 }

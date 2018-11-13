@@ -26,6 +26,7 @@ The following functions provide some more "niche" functionality
 \item{\code{\link{twosamplecompare}}}{Compare segments and copy number profile of two samples and plot overlay}
 \item{\code{\link{squaremodelsummary}}}{Return or print a summary of a squaremodel}
 \item{\code{\link{loopsquaremodel}}}{Perform squaremodel fitting on all samples in a QDNAseq-object}
+\item{\code{\link{forcesegmentsontemplate}}}{Custom resegmentation with user-defined segment information}
 }
 }
 

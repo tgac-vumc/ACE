@@ -1,27 +1,22 @@
 Package: ACE
-Title: Absolute Copy Number Estimation from Low-coverage Whole Genome Sequencing
+Title: Absolute Copy Number Estimation from Low-coverage Whole Genome
+        Sequencing
 Description: Uses segmented copy number data to estimate tumor cell percentage 
     and produce copy number plots displaying absolute copy numbers.
-Version: 1.1.0
+Version: 1.1.1
 Author: Jos B Poell
 Maintainer: Jos B Poell <j.poell@vumc.nl>
 Depends: R (>= 3.4)
-Imports:
-    Biobase,
-    QDNAseq,
-    ggplot2,
-       grid,
-      stats,
-      utils,
-    methods,
-   grDevices
-biocViews: CopyNumberVariation, DNASeq, Coverage, WholeGenome, Visualization, Sequencing
+Imports: Biobase, QDNAseq, ggplot2, grid, stats, utils, methods,
+        grDevices, GenomicRanges
+biocViews: CopyNumberVariation, DNASeq, Coverage, WholeGenome,
+        Visualization, Sequencing
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/tgac-vumc/ACE
 RoxygenNote: 6.0.1
-Suggests: knitr,
-    rmarkdown,
-    BiocStyle
+Suggests: knitr, rmarkdown, BiocStyle
 VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2018-11-13 12:01:12 UTC; jos

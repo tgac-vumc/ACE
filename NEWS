@@ -1,7 +1,9 @@
-Changes in version 0.99.8 (2018-09-06)
+Changes in version 1.1.1 (2018-11-13)
 -------------------------------------
 
-o bugfix in squaremodelsummary: remove standard in singleplot call
+o added forcesegmentsontemplate function
+o speed boost by small coding change in model fitting
+o added argument in loopsquaremodel to make returning the models optional and flexible (see documentation)
 
 
 Changes in version 0.99.6 (2018-07-26)

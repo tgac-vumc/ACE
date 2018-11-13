@@ -11,7 +11,8 @@ Create \code{squaremodel} summaries for all samples in a QDNAseq-object
 loopsquaremodel(object, ptop = 5, pbottom = 1, prows = 100, 
                 method = 'RMSE', penalty = 0, penploidy = 0,
                 outputdir, imagetype = 'pdf', trncname = FALSE, 
-                printplots = TRUE, printobjectsummary = TRUE)
+                returnmodels = FALSE, printplots = TRUE, 
+                printobjectsummary = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,21 +26,22 @@ loopsquaremodel(object, ptop = 5, pbottom = 1, prows = 100,
   \item{outputdir}{Character string. Print the plots to this directory}
   \item{imagetype}{Character string. Plots are printed to file using this graphics device. "pdf" will result in pdf-files containing 8 pages with individual plots, while the other devices print 2x4 mosaics per sample. Default = "pdf"}
   \item{trncname}{Logical. If set to TRUE, \code{trncname} truncates the sample name from the first instance of "_" in the name. You can also specify the regular expression here, e.g. trncname = "-.*" truncates the name from the first dash. Default = FALSE}
+  \item{returnmodels}{Logical. Return the squaremodel results as a list. If set to TRUE, the entire squaremodel is returned for each sample. You can also specify which aspects of the model you wish to capture, for instance \code{returnmodels = c("penalty", "minimadf")}. The sample name will always be included as the first listed item. Default = FALSE}
   \item{printplots}{Logical. Print the plots to file. Note that the object summary is not affected by this argument. Default = TRUE}
   \item{printobjectsummary}{Logical. Print the object summary to file. Default = TRUE}
 }
 \details{
-This function is basically the squaremodel equivalent of \code{\link{ploidyplotloop}}. One key difference is the output. \code{loopsquaremodel} returns a list with the squaremodels of each sample. The squaremodels are supplemented with the sample names. The output printed to file is optional (though by default enabled). 
+This function is basically the squaremodel equivalent of \code{\link{ploidyplotloop}}. One key difference is the output. \code{loopsquaremodel} makes a single page summary of each sample in the object. It can also return a list with the squaremodels of each sample as a variable within the R environment. The squaremodels are supplemented with the sample names. The output printed to file is optional (though by default enabled). 
 }
 \value{
-Returns a list with squaremodels for each sample in a QDNAseq-object. If \code{printplots} is TRUE, the plots will be printed to file. If \code{printobjectsummary} is TRUE, an object summary will be printed, containing the matrixplot and the copy number plot of the best fit of each sample.  
+Optionally returns a list with squaremodels (or the selected items of interest from the models) for each sample in a QDNAseq-object. If \code{printplots} is TRUE, the plots will be printed to file. If \code{printobjectsummary} is TRUE, an object summary will be printed, containing the matrixplot and the copy number plot of the best fit of each sample.  
 }
 
 \author{
 Jos B. Poell
 }
 \note{
-In case of large numbers of samples, you may have to set \code{printobjectsummary} to FALSE to prevent file size or memory issues.
+In case of large numbers of samples, you may have to set \code{printobjectsummary} to FALSE to prevent file size or memory issues. For similar reasons, the default of \code{returnmodels} is FALSE.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -53,7 +55,8 @@ In case of large numbers of samples, you may have to set \code{printobjectsummar
   loopsquaremodel(copyNumbersSegmented, penalty = 0.5, penploidy = 0.5)
   }
 lsm <- loopsquaremodel(copyNumbersSegmented, printplots = FALSE, 
-  printobjectsummary = FALSE, penalty = 0.5, penploidy = 0.5)
+  printobjectsummary = FALSE, penalty = 0.5, penploidy = 0.5, 
+  returnmodels = TRUE)
 ls(lsm[[1]])
 lsm[[1]]$samplename
 lsm[[1]]$matrixplot
