@@ -19,6 +19,16 @@ devtools::install_github("tgac-vumc/ACE")
 
 Required dependencies for ACE are **Biobase**, **QDNAseq**, and **ggplot2**.
 
+### Citation
+
+ACE is described in the following publication:
+
+ACE: Absolute Copy number Estimation from low-coverage whole-genome sequencing data.
+Poell JB, Mendeville M, Sie D, Brink A, Brakenhoff RH, Ylstra B.
+Bioinformatics. 2018 Dec 28. doi: 10.1093/bioinformatics/bty1055
+
+Please cite this paper when using ACE!
+
 ### What is ACE?
 
 ACE is a an absolute copy number estimator that scales copy number data to fit with integer copy numbers. For this it uses segmented data from the QDNAseq package, which in turn uses a number of dependencies to turn mapped reads (in bam-files) into segmented data. Note: make sure QDNAseq fetches the bin annotations from the same genome build as the one used for aligning the sequencing data! On with ACE! In brief: ACE will run QDNAseq or use its output rds-file of segmented data. It will subsequently run through all samples in the object(s), for which it will create individual subdirectories. For each sample, it will calculate how well the segments fit (the relative error) to integer copy numbers for each percentage of "tumor cells" (cells with divergent segments). Note that it does not estimate for a lower percentage than 5. ACE will produce a graph with relative errors (all errors relative to the largest error). Said graph can be used to quickly identify the most likely fit. ACE selects all "minima" and saves the corresponding copy number plots. The "best fit" (lowest error) is not by definition the most likely fit! ACE will run models for a general tumor ploidy of 2N, but you can expand this to include any ploidy of your choosing. The program needs to make one assumption: the median bin segment value corresponds with the tumor's general ploidy. If none of the fits are to your liking, there are several functions to help you out. This is extensively covered in the vignette.

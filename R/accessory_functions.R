@@ -201,27 +201,30 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
     template2 <- objectsampletotemplate(template2, index2)
     if(missing(name2)) {name2<-pd2$name[index2]}
   } else if(missing(name2)) {name2<-"sample2"}
-  segmentdata1 <- rle(as.vector(na.exclude(template1$segments)))
-  segmentdata2 <- rle(as.vector(na.exclude(template2$segments)))
+  if(nrow(template1)!=nrow(template2)){print("bins not matching")}
+  na1 <- apply(template1, 1, function(x) {any(is.na(x))})
+  na2 <- apply(template2, 1, function(x) {any(is.na(x))})
+  template1na <- template1[!(na1 | na2), ]
+  template2na <- template2[!(na1 | na2), ]
+  segmentdata1 <- rle(as.vector(na.exclude(template1na$segments)))
+  segmentdata2 <- rle(as.vector(na.exclude(template2na$segments)))
   if(missing(standard1) || !is(standard1, "numeric")) { standard1 <- median(rep(segmentdata1$values,segmentdata1$lengths)) }
-  adjustedcopynumbers1 <- ploidy1 + ((template1$copynumbers-standard1)*(cellularity1*(ploidy1-2)+2))/(cellularity1*standard1)
+  adjustedcopynumbers1 <- ploidy1 + ((template1na$copynumbers-standard1)*(cellularity1*(ploidy1-2)+2))/(cellularity1*standard1)
   adjcnna1 <- as.vector(na.exclude(adjustedcopynumbers1))
   if(missing(standard2) || !is(standard2, "numeric")) { standard2 <- median(rep(segmentdata2$values,segmentdata2$lengths)) }
-  adjustedcopynumbers2 <- ploidy2 + ((template2$copynumbers-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
+  adjustedcopynumbers2 <- ploidy2 + ((template2na$copynumbers-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
   adjcnna2 <- as.vector(na.exclude(adjustedcopynumbers2))
-  template1na <- na.exclude(template1)
+
   bin <- template1na$bin
   if(altmethod==FALSE){
     template1na <- template1na[, seq(1,4)]
     template1na$copynumbers <- adjcnna1
   }
-  template2na <- na.exclude(template2)
+  
   if(altmethod==FALSE){
     template2na <- template2na[, seq(1,4)]
     template2na$copynumbers <- adjcnna2
   }
-  
-  if(length(template1na$chr)!=length(template2na$chr)){print("bins not matching")}
   
   Chromosome <- c()
   Start <- c()

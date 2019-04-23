@@ -1,3 +1,10 @@
+Changes in version 1.1.2 (2019-04-23)
+-------------------------------------
+
+o added citation information!
+o fixed bug in getadjustedsegments and twosamplecompare with non-matching NAs
+
+
 Changes in version 1.1.1 (2018-11-13)
 -------------------------------------
 

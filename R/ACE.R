@@ -695,9 +695,9 @@ getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellulari
   if(QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
   segmentdata <- rle(as.vector(na.exclude(template$segments)))
   if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
-  adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
-  adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   template.na <- na.exclude(template)
+  adjustedcopynumbers <- ploidy + ((template.na$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
+  adjustedsegments <- ploidy + ((template.na$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   adjsegmentdata <- rle(as.vector(na.exclude(adjustedsegments)))
   adjcopynumberdata <- as.vector(na.exclude(adjustedcopynumbers))
   Chromosome <- c()

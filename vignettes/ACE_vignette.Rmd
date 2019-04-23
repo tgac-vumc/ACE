@@ -428,7 +428,9 @@ ACE is licensed under GPL
 
 ## Reference
 
-There is currently no literature reference for ACE. Please refer to Poell et al. followed by the web site. The package, this document, and the web site will be updated as soon as a literature reference is available. 
+ACE: Absolute Copy number Estimation from low-coverage whole-genome sequencing data.
+Poell JB, Mendeville M, Sie D, Brink A, Brakenhoff RH, Ylstra B.
+Bioinformatics. 2018 Dec 28. doi: 10.1093/bioinformatics/bty1055 
 
 ## Session information
 

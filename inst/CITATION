@@ -1,0 +1,14 @@
+bibentry(bibtype="Article",
+    author=c(person(c("Jos", "B"), "Poell"),
+    person("Matias", "Mendeville"),
+    person("Daoud", "Sie"),
+    person("Arjen", "Brink"),
+    person(c("Ruud", "H"), "Albertson"),
+    person("Bauke", "Ylstra")),
+    year=2018,
+    title=paste("ACE: Absolute Copy number Estimation from",
+    "low-coverage whole-genome sequencing data"),
+    journal="Bioinformatics",
+    doi="10.1093/bioinformatics/bty1055")
+
+# EOF
