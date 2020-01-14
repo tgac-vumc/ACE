@@ -693,13 +693,15 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
 # the segment value and the corresponding standard error and the p-value (in log10) associated with the nearest absolute copy number
 getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, ploidy = 2, standard, log=FALSE) {
   if(QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
-  segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
   template.na <- na.exclude(template)
+  segmentdata <- rle(as.vector(paste0(template.na$chr, "_", template.na$segments)))
+  segmentdata$values <- as.numeric(gsub(".*_", "", segmentdata$values))
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
   adjustedcopynumbers <- ploidy + ((template.na$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   adjustedsegments <- ploidy + ((template.na$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
-  adjsegmentdata <- rle(as.vector(na.exclude(adjustedsegments)))
-  adjcopynumberdata <- as.vector(na.exclude(adjustedcopynumbers))
+  adjsegmentdata <- rle(as.vector(paste0(template.na$chr, "_", adjustedsegments)))
+  adjsegmentdata$values <- as.numeric(gsub(".*_", "", adjsegmentdata$values))
+  adjcopynumberdata <- as.vector(adjustedcopynumbers)
   Chromosome <- c()
   Start <- c()
   End <- c()
