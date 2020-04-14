@@ -61,6 +61,6 @@ Additional functions are available in accessory_functions.R. Check out their doc
 
 There are some more snippets of advice in the code, and tons more in the function documentation. For a walkthrough ... try the walkthrough in the vignette! 
 
-That's pretty much it for now, let us know if you run into some errors or oddities: j.poell@vumc.nl and rh.brakenhoff@vumc.nl
+That's pretty much it for now, let us know if you run into some errors or oddities: j.poell@amsterdamumc.nl and rh.brakenhoff@amsterdamumc.nl
 
 P.s. ACE uses the ggplot2-package for output plots. If you wish to use ACE-functions that return plots in a loop or a function of your own and save these plots to file, you need to feed the plots into the graphics device with the print() function. This is a peculiarity of ggplot2.

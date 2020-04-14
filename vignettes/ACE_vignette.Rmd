@@ -420,7 +420,7 @@ forcesegmentsontemplate
 ## Contact
 
 ACE was developed by Jos B. Poell at the VU Medical Center in the department of otolaryngology and head and neck surgery in collaboration with the department of pathology. Source code is available through GitHub: https://github.com/tgac-vumc/ACE
-Questions regarding ACE can be sent to j.poell@vumc.nl or rh.brakenhoff@vumc.nl
+Questions regarding ACE can be sent to j.poell@amsterdamumc.nl or rh.brakenhoff@amsterdamumc.nl
 
 ## License
 

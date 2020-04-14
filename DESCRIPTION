@@ -5,7 +5,7 @@ Description: Uses segmented copy number data to estimate tumor cell percentage
     and produce copy number plots displaying absolute copy numbers.
 Version: 1.5.1
 Author: Jos B Poell
-Maintainer: Jos B Poell <j.poell@vumc.nl>
+Maintainer: Jos B Poell <j.poell@amsterdamumc.nl>
 Depends: R (>= 3.4)
 Imports: Biobase, QDNAseq, ggplot2, grid, stats, utils, methods,
         grDevices, GenomicRanges
