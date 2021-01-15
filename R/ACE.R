@@ -778,8 +778,10 @@ getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellulari
   template.na <- na.exclude(template)
   gc <- rep(2, nrow(template.na))
   gc[template.na$chr %in% sgc] <- 1
-  # segmentdata <- rle(as.vector(paste0(template.na$chr, "_", template.na$segments)))
-  # segmentdata$values <- as.numeric(gsub(".*_", "", segmentdata$values))
+  if(log!=FALSE) {
+    segmentdata <- rle(as.vector(paste0(template.na$chr, "_", template.na$segments)))
+    segmentdata$values <- as.numeric(gsub(".*_", "", segmentdata$values))
+  }
   # if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
   if(missing(standard) || !is(standard, "numeric")) { standard <- median(template.na$segments) }
   # adjustedcopynumbers <- ploidy + ((template.na$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
@@ -1059,10 +1061,10 @@ postanalysisloop <- function(copyNumbersSegmented,modelsfile,variantdata,prefix=
           newplots[[a]] <- singleplot(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a,title=pd$name[a])
         } else if (grepl("^m", gender, ignore.case = TRUE)) {
           newplots[[a]] <- singleplot(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a,title=pd$name[a],
-                                      onlyautosomes=FALSE, sgc = c("X", "Y"))
+                                      onlyautosomes=onlyautosomes, sgc = c("X", "Y"))
         } else {
           newplots[[a]] <- singleplot(copyNumbersSegmented,cellularity=cellularity,ploidy=ploidy,standard=standard,QDNAseqobjectsample=a,title=pd$name[a],
-                                      onlyautosomes=FALSE)
+                                      onlyautosomes=onlyautosomes)
         }
         
         imagefunction <- get(imagetype)

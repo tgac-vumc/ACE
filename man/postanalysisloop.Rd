@@ -15,7 +15,8 @@ postanalysisloop(copyNumbersSegmented, modelsfile, variantdata,
                  confidencelevel=FALSE, append=TRUE,
                  dontmatchnames=FALSE, printsegmentfiles=TRUE,
                  printnewplots=TRUE, imagetype='pdf',
-                 outputdir="./", log=FALSE, segext='tsv', genderci)
+                 onlyautosomes=TRUE,outputdir="./", log=FALSE, 
+                 segext='tsv', genderci)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,6 +40,7 @@ postanalysisloop(copyNumbersSegmented, modelsfile, variantdata,
   \item{printsegmentfiles}{Logical. When TRUE, prints a tab-delimited text file for each sample into a "segmentfiles" folder. Default = TRUE}
   \item{printnewplots}{Logical. When TRUE, prints plots into a "newplots" folder in the specified image type. Default = TRUE}
   \item{imagetype}{Character string specifying the image type graphics device. Default = "pdf"}
+  \item{onlyautosomes}{Logical or integer. Specifies whether only or which autosomes are plotted. For more documentation, see \code{singleplot}}
   \item{outputdir}{Character string. Save output into this custom directory. Default = "./"}
   \item{log}{Logical or integer. Use log conversion for creating segments output. Default = FALSE}
   \item{segext}{Character string specifying the extension for the segments output. Default = "tsv"}
