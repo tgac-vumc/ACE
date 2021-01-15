@@ -9,7 +9,8 @@
 # the calls.
 
 ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2, standard, plot=TRUE, title, 
-                    pcutoff, qcutoff=-3, subcutoff=0.2, trncname=FALSE, cap=12, bottom=0, chrsubset, onlyautosomes = TRUE) {
+                    pcutoff, qcutoff=-3, subcutoff=0.2, trncname=FALSE, cap=12, bottom=0, chrsubset, 
+                    onlyautosomes = TRUE, sgc = c()) {
   if(QDNAseqobjectsample) {
     if(missing(title)) {
       pd<-Biobase::pData(template)
@@ -19,18 +20,33 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
     }
     template <- objectsampletotemplate(template, QDNAseqobjectsample)
   }
+  gc <- rep(2, nrow(template))
+  gc[template$chr %in% sgc] <- 1
   if(missing(title)) {title <- "Plot"}
-  segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
-  adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
-  adjcopynumberdata <- as.vector(na.exclude(adjustedcopynumbers))
-  adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
+  #segmentdata <- rle(as.vector(na.exclude(template$segments)))
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(template$segments, na.rm = T) }
+  adjustedcopynumbers <- template$copynumbers*(ploidy+2/cellularity-2)/standard - gc/cellularity + gc
+  adjustedsegments <- template$segments*(ploidy+2/cellularity-2)/standard - gc/cellularity + gc
+  #adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
+  #adjcopynumberdata <- as.vector(na.exclude(adjustedcopynumbers))
+  #adjustedsegments <- ploidy + ((template$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   template$chr <- gsub("chr","",template$chr,ignore.case = TRUE)
-  df <- template
-  templatena <- na.exclude(template)
-  bin <- templatena$bin
-  df$adjustedcopynumbers <- adjustedcopynumbers
-  df$adjustedsegments <- adjustedsegments
+  df <- data.frame(bin=template$bin,chr=template$chr,adjustedcopynumbers,adjustedsegments,gc)
+  colnames(df)[3] <- "copynumbers"
+  colnames(df)[4] <- "segments"
+  
+  dfna <- na.exclude(df)
+  bin <- dfna$bin
+  copynumbers <- dfna$copynumbers
+  segments <- dfna$segments
+  if(bottom=="min"){bottom<-floor(min(dfna$copynumbers))}
+  if(cap=="max"){cap<-ceiling(max(dfna$copynumbers))}
+  if(!missing(chrsubset)){
+    firstchr <- range(chrsubset)[1]
+    lastchr <- range(chrsubset)[2]
+    dfna <- dfna[dfna$chr %in% rlechr$values[seq(firstchr,lastchr)],]
+  }
+  segmentdata <- rle(as.vector(paste0(dfna$chr, "_", dfna$segments)))
   num_bins <- segmentdata$lengths
   segment_mean <- c()
   segment_SE <- c()
@@ -53,56 +69,59 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   
   counter <- 1
   for (i in seq_along(segmentdata$lengths)) {
-    segment_mean[i] <- mean(adjcopynumberdata[seq(counter, counter+segmentdata$lengths[i]-1)])
-    segment_SE[i] <- sd(adjcopynumberdata[seq(counter, counter+segmentdata$lengths[i]-1)])/sqrt(segmentdata$lengths[i])
+    segment_mean[i] <- mean(dfna$copynumbers[seq(counter, counter+segmentdata$lengths[i]-1)])
+    segment_SE[i] <- sd(dfna$copynumbers[seq(counter, counter+segmentdata$lengths[i]-1)])/sqrt(segmentdata$lengths[i])
     p[i] <- 2*(1-pnorm(abs(round(ploidy,digits = 0)-segment_mean[i])/segment_SE[i]))
     probnorm[i] <- round(log(p[i],10),digits=3)
     counter <- counter+segmentdata$lengths[i]
   }
   qprobnorm <- round(log(p.adjust(p, method='BH'),10),digits=3)
   
-  calls[(segment_mean<sl)] <- -0.5
-  color[(segment_mean<sl)] <- 'turquoise'
-  calls[(segment_mean<l)] <- -1
-  color[(segment_mean<l)] <- 'blue'
-  calls[(segment_mean<dl)] <- -2
-  color[(segment_mean<dl)] <- 'darkblue'
-  calls[(segment_mean>sg)] <- 0.5
-  color[(segment_mean>sg)] <- 'gold'
-  calls[(segment_mean>g)] <- 1
-  color[(segment_mean>g)] <- 'darkorange'
-  calls[(segment_mean>dg)] <- 2
-  color[(segment_mean>dg)] <- 'red'
-  calls[(segment_mean>amp)] <- 3
-  color[(segment_mean>amp)] <- 'purple'
-  calls[(segment_mean>=sl&segment_mean<=sg)] <- 0
-  color[(segment_mean>=sl&segment_mean<=sg)] <- 'black'
+  segment_m <- rep(segment_mean, num_bins)+2-dfna$gc
+  calls[(segment_m<sl)] <- -0.5
+  color[(segment_m<sl)] <- 'turquoise'
+  calls[(segment_m<l)] <- -1
+  color[(segment_m<l)] <- 'blue'
+  calls[(segment_m<dl)] <- -2
+  color[(segment_m<dl)] <- 'darkblue'
+  calls[(segment_m>sg)] <- 0.5
+  color[(segment_m>sg)] <- 'gold'
+  calls[(segment_m>g)] <- 1
+  color[(segment_m>g)] <- 'darkorange'
+  calls[(segment_m>dg)] <- 2
+  color[(segment_m>dg)] <- 'red'
+  calls[(segment_m>amp)] <- 3
+  color[(segment_m>amp)] <- 'purple'
+  calls[(segment_m>=sl&segment_m<=sg)] <- 0
+  color[(segment_m>=sl&segment_m<=sg)] <- 'black'
   if(missing(pcutoff)){
-    calls[(qprobnorm>=qcutoff)] <- 0
-    color[(qprobnorm>=qcutoff)] <- 'black'
+    calls[rep(qprobnorm,num_bins)>=qcutoff] <- 0
+    color[rep(qprobnorm,num_bins)>=qcutoff] <- 'black'
   } else {
-    calls[(probnorm>=pcutoff)] <- 0
-    color[(probnorm>=pcutoff)] <- 'black'
+    calls[rep(probnorm,num_bins)>=pcutoff] <- 0
+    color[rep(probnorm,num_bins)>=pcutoff] <- 'black'
   }
   
-  templatena$segment_mean <- rep(segment_mean,num_bins)
-  templatena$segment_SE <- rep(segment_SE,num_bins)
-  templatena$probnorm <- rep(probnorm,num_bins)
-  templatena$qprobnorm <- rep(qprobnorm,num_bins)
-  templatena$calls <- rep(calls,num_bins)
-  templatena$color <- rep(color,num_bins)
+  # templatena <- na.exclude(template)
+  # templatena$segment_mean <- rep(segment_mean,num_bins)
+  # templatena$segment_SE <- rep(segment_SE,num_bins)
+  # templatena$probnorm <- rep(probnorm,num_bins)
+  # templatena$qprobnorm <- rep(qprobnorm,num_bins)
+  # templatena$calls <- rep(calls,num_bins)
+  # templatena$color <- rep(color,num_bins)
   df$segment_mean <- rep(NA,length(df$bin))
-  df$segment_mean[templatena$bin] <- templatena$segment_mean
+  df$segment_mean[dfna$bin] <- rep(segment_mean,num_bins) # templatena$segment_mean
   df$segment_SE <- rep(NA,length(df$bin))
-  df$segment_SE[templatena$bin] <- templatena$segment_SE
+  df$segment_SE[dfna$bin] <- rep(segment_SE,num_bins) # templatena$segment_SE
   df$pnorm_log10 <- rep(NA,length(df$bin))
-  df$pnorm_log10[templatena$bin] <- templatena$probnorm
+  df$pnorm_log10[dfna$bin] <- rep(probnorm,num_bins) # templatena$probnorm
   df$qnorm_log10 <- rep(NA,length(df$bin))
-  df$qnorm_log10[templatena$bin] <- templatena$qprobnorm
+  df$qnorm_log10[dfna$bin] <- rep(qprobnorm,num_bins) # templatena$qprobnorm
   df$calls <- rep(NA,length(df$bin))
-  df$calls[templatena$bin] <- templatena$calls
+  df$calls[dfna$bin] <- calls # templatena$calls
   df$color <- rep('black',length(df$bin))
-  df$color[templatena$bin] <- templatena$color
+  df$color[dfna$bin] <- color # templatena$color
+  dfna <- na.exclude(df)
   
   if(plot==TRUE){
     if(onlyautosomes==TRUE) {
@@ -118,7 +137,7 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
       binchrend <- append(binchrend, currentbin)
       binchrmdl <- append(binchrmdl, currentmiddle)
     }
-    dfna <- na.exclude(df)
+    
     if(bottom=="min"){bottom<-floor(min(dfna$adjustedcopynumbers))}
     if(cap=="max"){cap<-ceiling(max(dfna$adjustedcopynumbers))}
     cappedcopynumbers <- dfna[(dfna$adjustedcopynumbers > cap),]
@@ -137,12 +156,12 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
         geom_hline(yintercept = seq(0, 4), color = '#333333', size = 0.5) +
         geom_hline(yintercept = seq(5, cap-1), color = 'lightgray', size = 0.5) +
         geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
-        geom_point(aes(x = bin,y = adjustedcopynumbers),data=dfna[(dfna$adjustedcopynumbers>bottom&dfna$adjustedcopynumbers<cap),], size = 0.1, color = 'gray') +
-        geom_point(aes(x = bin,y = adjustedcopynumbers),data=cappedcopynumbers, size = 0.5, color = 'gray', shape = 24) +
-        geom_point(aes(x = bin,y = adjustedcopynumbers),data=toppedcopynumbers, size = 0.5, color = 'gray', shape = 25) +
-        geom_point(aes(x = bin,y = adjustedsegments),data=dfna[(dfna$adjustedsegments>bottom&dfna$adjustedsegments<cap),], size = 1, color = dfna$color[(dfna$adjustedsegments>bottom&dfna$adjustedsegments<cap)]) +
-        geom_point(aes(x = bin,y = adjustedsegments),data=cappedsegments, size = 1, color = 'purple', shape = 24) +
-        geom_point(aes(x = bin,y = adjustedsegments),data=toppedsegments, size = 1, color = 'darkblue', shape = 25) +
+        geom_point(aes(x = bin,y = copynumbers),data=dfna[(dfna$copynumbers>bottom&dfna$copynumbers<cap),], size = 0.1, color = 'gray') +
+        geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'gray', shape = 24) +
+        geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.5, color = 'gray', shape = 25) +
+        geom_point(aes(x = bin,y = segments),data=dfna[(dfna$segments>bottom&dfna$segments<cap),], size = 1, color = dfna$color[(dfna$segments>bottom&dfna$segments<cap)]) +
+        geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 1, color = 'purple', shape = 24) +
+        geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 1, color = 'darkblue', shape = 25) +
         theme_classic() + theme(
           axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
         ggtitle(title) +
@@ -161,12 +180,12 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
         geom_hline(yintercept = seq(0, 4), color = '#333333', size = 0.5) +
         geom_hline(yintercept = seq(5, cap-1), color = 'lightgray', size = 0.5) +
         geom_vline(xintercept = binchrend[seq(firstchr,lastchr)], color = "#666666", linetype = "dashed") +
-        geom_point(aes(x = bin,y = adjustedcopynumbers),data=dfna[(dfna$adjustedcopynumbers>bottom&dfna$adjustedcopynumbers<cap),], size = 0.1, color = 'gray') +
-        geom_point(aes(x = bin,y = adjustedcopynumbers),data=cappedcopynumbers, size = 0.5, color = 'gray', shape = 24) +
-        geom_point(aes(x = bin,y = adjustedcopynumbers),data=toppedcopynumbers, size = 0.5, color = 'gray', shape = 25) +
-        geom_point(aes(x = bin,y = adjustedsegments),data=dfna[(dfna$adjustedsegments>bottom&dfna$adjustedsegments<cap),], size = 1, color = dfna$color[(dfna$adjustedsegments>bottom&dfna$adjustedsegments<cap)]) +
-        geom_point(aes(x = bin,y = adjustedsegments),data=cappedsegments, size = 1, color = 'purple', shape = 24) +
-        geom_point(aes(x = bin,y = adjustedsegments),data=toppedsegments, size = 1, color = 'darkblue', shape = 25) +
+        geom_point(aes(x = bin,y = copynumbers),data=dfna[(dfna$copynumbers>bottom&dfna$copynumbers<cap),], size = 0.1, color = 'gray') +
+        geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'gray', shape = 24) +
+        geom_point(aes(x = bin,y = copynumbers),data=toppedcopynumbers, size = 0.5, color = 'gray', shape = 25) +
+        geom_point(aes(x = bin,y = segments),data=dfna[(dfna$segments>bottom&dfna$segments<cap),], size = 1, color = dfna$color[(dfna$segments>bottom&dfna$segments<cap)]) +
+        geom_point(aes(x = bin,y = segments),data=cappedsegments, size = 1, color = 'purple', shape = 24) +
+        geom_point(aes(x = bin,y = segments),data=toppedsegments, size = 1, color = 'darkblue', shape = 25) +
         theme_classic() + theme(
           axis.line = element_line(color='black'), axis.ticks = element_line(color='black'), axis.text = element_text(color='black')) +
         ggtitle(title) +
@@ -480,12 +499,13 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
                                                  correlation=correlation))
   } else {return(combinedsegmentsdf)}
 }
+
 # This code can be used to more systematically use the squaremodel function.
 # squaremodelsummary() returns a list of plots starting with the matrix plots and followed by up to 7 CNPs of the best fits.
-# Besides the squaremodel, it also requires the sample data, either as template dataframe or as QDNAseq-object with the appropriate sample index
+# Beside the squaremodel, it also requires the sample data, either as template dataframe or as QDNAseq-object with the appropriate sample index
 # You can save the plots to a variable or directly print them (which currently is the default!).
 # I figured a 2x4 summary page would be nice. You can't currently specify this with parameters, 
-#  so if you want to adjust this you have to manually change the code below.
+# so if you want to adjust this you have to manually change the code below.
 
 squaremodelsummary <- function(template,QDNAseqobjectsample=FALSE,squaremodel,samplename,printplots=TRUE,outputdir,imagetype='pdf',trncname=FALSE) {
   binsize <- 0
@@ -639,21 +659,28 @@ correlationmatrixadjusted <- function(object, trncname=FALSE, equalsegments=FALS
   return(cormat)
 }
 
-# This function creates a template (used in many ACE functions) from a segment file (created by many other programs, and available
-#  for download from the TCGA amongst others!!!).
-# The argument segmentdf can either be a data frame with segmented data or the location of a tab-delimited text-file
-# It is important that chromosomes are either integers or chr followed by the number of the chromosome (e.g. chr1)
-# It doesn't hurt if the file contains segmented data on X and Y chromosome, as long as they are listed after the autosomes
-# The function expects the following order of columns: chromosome, start, end, number of bins, segment value
-# You can use the arguments of the function to specify the index of the relevant columns, if necessary
-# The argument log actually transforms log-values back to linear scaling; if set to TRUE, it converts back from natural logarithm
-# Alternatively you can specify the base of the log-conversion (commonly 2)
-# The standard error and standard deviation columns are "cheat" arguments. Segment files do not specify the copynumber value per bin,
-#  which is one of the columns that the template needs. If omitted, copynumbers will take the same values as segments, and will
-#  disappear behind the segment values in the copy number plot. It is possible that standard error or standard deviation data is
-#  available per segment. In that case, you can create "simulated" copynumber values that are taken from a normal distribution 
-#  corresponding to the segment mean and the given standard deviation or standard error. Obviously, this is merely meant as a 
-#  visualization aide!!! 
+# This function creates a template (used in many ACE functions) from a segment
+# file (created by many other programs, and available for download from the TCGA
+# amongst others!!!). The argument segmentdf can either be a data frame with
+# segmented data or the location of a tab-delimited text-file. It is important
+# that chromosomes are either integers or chr followed by the number of the
+# chromosome (e.g. chr1) It doesn't hurt if the file contains segmented data on
+# X and Y chromosome, as long as they are listed after the autosomes. The
+# function expects the following order of columns: chromosome, start, end,
+# number of bins, segment value. You can use the arguments of the function to
+# specify the index of the relevant columns, if necessary The argument log
+# actually transforms log-values back to linear scaling; if set to TRUE, it
+# converts back from natural logarithm. Alternatively you can specify the base
+# of the log-conversion (commonly 2). The standard error and standard deviation
+# columns are "cheat" arguments. Segment files do not specify the copynumber
+# value per bin, which is one of the columns that the template needs. If
+# omitted, copynumbers will take the same values as segments, and will disappear
+# behind the segment values in the copy number plot. It is possible that
+# standard error or standard deviation data is available per segment. In that
+# case, you can create "simulated" copynumber values that are taken from a
+# normal distribution corresponding to the segment mean and the given standard
+# deviation or standard error. Obviously, this is merely meant as a
+# visualization aide!!!
 
 segmentstotemplate <- function(segmentdf, chrci=1, startci=2, endci=3, binsci=4, meanci=5, seci, sdci, log=FALSE) {
   if(is(segmentdf, "character")) {segmentdf <- try(read.table(segmentdf, header = TRUE, comment.char = "", sep = "\t"))}
@@ -732,14 +759,19 @@ compresstemplate <- function(template, factor = 20, funtype = 'median'){
   return(compressedtemplate)
 }
 
-# This function was inspired by twosamplecompare, which also has the option to "resegment" copy number data using equally
-#  sized segments. I figured the option to do this was useful enough to make it its own function, since the output can be used as 
-#  input for other functions (singlemodel, squaremodel, singleplot, ACEcall)
-# You obviously want equal segments if you use this function ... the argument equalsegments specifies how many bins (or probes)
-#  should be in this segment. Each chromosome is divided into segments of roughly this number of bins.
-# The function expects an ACE template, but obviously the value of segments is not necessary. You can also feed it a data frame
-#  which contains the columns "bin", "chr", "start", "end", "copynumbers", with copynumbers being the value of a bin or probe.
-# The columns "bin", "start", and "end" are not used, but they are integral to templates for other ACE functions.
+# This function was inspired by twosamplecompare, which also has the option to
+# "resegment" copy number data using equally sized segments. I figured the
+# option to do this was useful enough to make it its own function, since the
+# output can be used as input for other functions (singlemodel, squaremodel,
+# singleplot, ACEcall) You obviously want equal segments if you use this
+# function ... the argument equalsegments specifies how many bins (or probes)
+# should be in this segment. Each chromosome is divided into segments of roughly
+# this number of bins. The function expects an ACE template, but obviously the
+# value of segments is not necessary. You can also feed it a data frame which
+# contains the columns "bin", "chr", "start", "end", "copynumbers", with
+# copynumbers being the value of a bin or probe. The columns "bin", "start", and
+# "end" are not used, but they are integral to templates for other ACE
+# functions.
 
 templatefromequalsegments <- function(template, QDNAseqobjectsample = FALSE, equalsegments = 20, funtype = 'mean', chrsubset, onlyautosomes = TRUE) {
   fun <- get(funtype)

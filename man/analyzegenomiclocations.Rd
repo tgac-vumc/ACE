@@ -9,7 +9,7 @@ Retrieve adjusted copy number information for specific genomic locations
 }
 \usage{
 analyzegenomiclocations(segmentdf, Chromosome, Position, 
-                        Frequency, cellularity)
+                        Frequency, cellularity, sgc = c())
 }
 
 \arguments{
@@ -18,6 +18,7 @@ analyzegenomiclocations(segmentdf, Chromosome, Position,
   \item{Position}{Numeric vector. Specifies the base position(s) of interest}
   \item{Frequency}{Numeric vector. Optional. Used (in conjuction with cellularity) to calculate mutant copies. Enter a percentage.}
   \item{cellularity}{Numeric. Only required when calculating mutant copies. Use same number as used with \code{getadjustedsegments}}
+  \item{sgc}{Integer or character vector. Specify which chromosomes occur with only a single copy in the germline}
 }
 \details{
 The formula that calculates mutant copies only works if the variant is not present in normal tissue. In other words, make sure variants are not of germline origin. If you are interested in a heterozygous germline variant, you can calculate the "mutant copies" by subtracting (1/cellularity - 1).
@@ -31,6 +32,8 @@ Jos B. Poell
 }
 \note{
 Chromosome, Position, and Frequency can be single values or vectors. In the latter case, they need to be of equal length. Make sure the position you enter matches with the genome build used for alignment / binning of sequence reads.
+
+When analyzing genomic locations on sex chromosomes of a male individual, make sure to specify \code{sgc = c("X","Y")}
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

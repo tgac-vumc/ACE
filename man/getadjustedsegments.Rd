@@ -9,8 +9,8 @@ Create a data frame with segment information corresponding to a model
 }
 \usage{
 getadjustedsegments(template, QDNAseqobjectsample = FALSE, 
-                    cellularity = 1, ploidy = 2, standard, 
-                    log = FALSE)
+                    cellularity = 1, ploidy = 2, sgc = c(),
+                    standard, log = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,7 @@ getadjustedsegments(template, QDNAseqobjectsample = FALSE,
   \item{QDNAseqobjectsample}{Integer. Specifies which sample to analyze from the QDNAseq-object. Required when using a QDNAseq-object as template. Default = FALSE}
   \item{cellularity}{Numeric. Used for rescaling bin and segment values. Default = 1}
   \item{ploidy}{Integer. Assume the median of segments has this absolute copy number. Default = 2}
+  \item{sgc}{Integer or character vector. Specify which chromosomes occur with only a single copy in the germline}
   \item{standard}{Numeric. Force the given ploidy to represent this raw value. When omitted, the standard will be calculated from the data. When using parameters obtained from \code{squaremodel}, specify standard = 1}
   \item{log}{Logical. When TRUE, log2-values are calculated straigth from raw data, unadjusted! Convenience function to resemble DNAcopy output as used for ABSOLUTE and others. Default = FALSE}
 }
@@ -26,6 +27,9 @@ The output contains two columns for segment mean. The first is the adjusted segm
 }
 \value{
 Returns a data frame with segment information
+}
+\note{
+If your data contains sex chromosomes, then make sure to specify sgc = c("X", "Y") when analyzing data from a male individual.
 }
 
 \author{

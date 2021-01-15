@@ -9,8 +9,9 @@ Calculate potential fits for a single sample using ploidy as a variable
 }
 \usage{
 squaremodel(template, QDNAseqobjectsample = FALSE, prows=100, 
-  ptop=5, pbottom=1, method = 'RMSE', exclude = c(), 
-  penalty = 0, penploidy = 0, highlightminima = TRUE, standard)
+  ptop=5, pbottom=1, method = 'RMSE', exclude = c(), sgc = c(),
+  penalty = 0, penploidy = 0, cellularities = seq(5,100), 
+  highlightminima = TRUE, standard)
 }
 
 \arguments{
@@ -21,14 +22,16 @@ squaremodel(template, QDNAseqobjectsample = FALSE, prows=100,
   \item{pbottom}{Numeric. Sets the lowest ploidy to be tested. Default = 1}
   \item{method}{Character string specifying which error method to use. For more documentation, consult the vignette. Can be "RMSE", "SMRE", or "MAE". Default = "RMSE"}
   \item{exclude}{Integer or character vector. Specifies which chromosomes to exclude for model fitting}
+  \item{sgc}{Integer or character vector. Specifies which chromosomes occur with only a single copy in the germline}
   \item{penalty}{Numeric. Penalizes fits at lower cellularities. Suggested values between 0 and 1. Default = 0 (no penalty)}
   \item{penploidy}{Numeric. Penalizes fits that diverge from 2N with the formula (1+abs(ploidy-2))^penploidy. Default = 0}
+  \item{cellularities}{Numeric vector. Specifies the cellularities (in percentage) to be tested}
   \item{highlightminima}{Logical. Minima are highlighted in the matrixplot by a black dot. Default = TRUE}
   \item{standard}{Numeric. Force the ploidy to represent this raw value. When omitted, the standard will be calculated from the data}
 }
 
 \details{
-Unlike other functionality of ACE, \code{squaremodel} does not use the "standard", but it fits all tested ploidies to "standard = 1". It is therefore necessary that segment values are normalized to 1 (which they are by default coming from QDNAseq). The penalty parameter is the same as in \code{singlemodel}. Additionally, it is possible to penalize fits at ploidies diverging from 2N using the penploidy parameter. For other details on the fitting algorithm, see \code{\link{singlemodel}}. Range of ploidies is set by parameters ptop and pbottom, and resolution is determined by prows. To create good contrast in the matrixplot, the color scale derives from the inverse of the error, and the opacity of the dots marking the minima is calculated as min(error)/error.
+Unlike other functionality of ACE, \code{squaremodel} does not use the "standard", but it fits all tested ploidies to "standard = 1". It is therefore necessary that segment values are normalized to 1 (which they are by default coming from QDNAseq). The penalty parameter is the same as in \code{singlemodel}. Additionally, it is possible to penalize fits at ploidies diverging from 2N using the penploidy parameter. For other details on the fitting algorithm, see \code{\link{singlemodel}}. Range of ploidies is set by parameters ptop and pbottom, and resolution is determined by prows. Resolution on the X-axis can be adapted by changing the cellularities option. To create good contrast in the matrixplot, the color scale derives from the inverse of the error, and the opacity of the dots marking the minima is calculated as min(error)/error.
 }
 \value{
 Returns a list, containing
@@ -48,11 +51,11 @@ Jos B. Poell
 \note{
 squaremodel() only needs a data frame with columns named \code{chr} and \code{segments}. Every row should contain an individual genomic feature, i.e. a bin or a probe. If you have data with each row representing a segment, and the size of the segment given in a column (e.g. NumBins or NumProbes), you can create the data frame as follows (giving the correct variable names of course): 
 
-\code{chr <- rep(Chromosome, NumProbes)}
+\code{template <- data.frame(chr = rep(Chromosome, NumProbes), segments = rep(SegmentMean, NumProbes))}
 
-\code{segments <- rep(SegmentMean, NumProbes)}
+Alternatively you can look into \code{\link{segmentstotemplate}}.
 
-\code{template <- cbind(chr, segments)}
+If your data contains sex chromosomes and you do not exclude them from model fitting, then make sure to specify \code{sgc = c("X", "Y")} when analyzing data from a male individual.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

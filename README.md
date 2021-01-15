@@ -2,18 +2,18 @@
 
 Absolute Copy number Estimation using low-coverage whole genome sequencing data
 
-This readme only contains an executive summary of ACE. You can read the accompanying paper as soon as its published. For now, some info is in here, and tons of info is in the R documentation. Additionally, a vignette is available which is written more or less as a guide and walkthrough. 
+This readme only contains an executive summary of ACE. The accompanying paper is published in Bioinformatics. For now, some info is in here, and tons of info is in the R documentation. Additionally, a vignette is available which is written more or less as a guide and walkthrough. 
 
 ### Installation
 
-ACE is an R package. It will become available via Bioconductor. If it is, the following commands will install ACE into R:
+ACE is an R package. It is available via Bioconductor. The following commands will install ACE into R:
 
 if (!requireNamespace("BiocManager", quietly=TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("ACE")
 
-If it is not yet available, or you wish to use the development version, you can install ACE directly using the devtools package:
+If you wish to use the development version, you can install ACE directly using the devtools package:
 
 devtools::install_github("tgac-vumc/ACE")
 

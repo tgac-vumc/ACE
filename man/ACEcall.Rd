@@ -11,7 +11,8 @@ ACEcall is the calling algorithm for ACE that utilizes the absolute copy number 
 ACEcall(template, QDNAseqobjectsample = FALSE, cellularity = 1, 
         ploidy = 2, standard, plot = TRUE, title, pcutoff, 
         qcutoff = -3, subcutoff = 0.2, trncname = FALSE, 
-        cap = 12, bottom = 0, chrsubset, onlyautosomes = TRUE)
+        cap = 12, bottom = 0, chrsubset, onlyautosomes = TRUE,
+        sgc = c())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,6 +31,7 @@ ACEcall(template, QDNAseqobjectsample = FALSE, cellularity = 1,
   \item{bottom}{Integer. Similar to cap, but for the lower limit of the y-axis. When set to "min", it sets the bottom to the minimum absolute copynumber value, rounded down. Bins and segments that subceed the bottom are represented by a special mark. Default = 0}
   \item{chrsubset}{Integer vector. Specify the chromosomes you want to plot. It will always take the full range of chromosomes in your subset, so specifying chrsubset = c(4, 8) will give the same plot as chrsubset = 4:8. When using a subset, \code{ACEcall} will not plot the cellularity and error on the plot.}
   \item{onlyautosomes}{Logical or integer. You can fill in an integer to specify how many autosomes your species has. When TRUE, \code{ACEcall} defaults to 22 (human) autosomes. When FALSE, \code{ACEcall} will also plot whichever other chromosomes are specified in the template, e.g. "X", "Y", "MT"}
+  \item{sgc}{Integer or character vector. Specify which chromosomes occur with only a single copy in the germline}
 }
 \details{
 The color code in the plot is as follows (in parentheses the call in the data frame):

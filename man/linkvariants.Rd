@@ -11,7 +11,7 @@ Append columns with total genomic copies and mutant copies to a file with varian
 linkvariants(variantdf, segmentdf, cellularity = 1, hetSNPs = FALSE,
              chrindex=1,posindex=2,freqindex,altreadsindex,
              totalreadsindex,refreadsindex,confidencelevel=FALSE,
-             append=TRUE, outputdir)
+             append=TRUE, outputdir, sgc = c())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,7 +27,8 @@ linkvariants(variantdf, segmentdf, cellularity = 1, hetSNPs = FALSE,
   \item{refreadsindex}{Integer. Column index in input file specifying the number of reference-supporting reads}
   \item{confidencelevel}{Numeric or logical. If read depth information is available, calculate the upper and lower bounds of this confidence level for the frequency and the number of variant copies of each variant. Will be skipped if FALSE. Default = FALSE}
   \item{append}{Logical. When TRUE, appends the output columns to the original mutation input file, but it still saves the result in a new file. When FALSE, the output file will only contain the columns "Chromosome", "Position", "Frequency", "Copynumbers", and "Mutant_copies". Default = TRUE}
-  \item{outputdir}{Character string. Convenience function to save output into a custom directory.}
+  \item{outputdir}{Character string. Convenience function to save output into a custom directory}
+  \item{sgc}{Integer or character vector. Specify which chromosomes occur with only a single copy in the germline}
 }
 \details{
 The default formula that calculates mutant copies works if the variant is not present in normal tissue. If you are interested in heterozygous germline variant, you can set the argument hetSNPs to TRUE. The confidence intervals are calculated using the binom.test function. 
@@ -40,7 +41,7 @@ Prints output to a tab-delimited file, or returns a data frame with columns adde
 Jos B. Poell
 }
 \note{
-Make sure the variant data matches with the genome build used for alignment / binning of sequence reads for copy number analysis. If the resulting Variant_copies are very low, the variant allele frequencies were probably provided as fraction, not percentage. Just multiply by 100.
+Make sure the variant data matches with the genome build used for alignment / binning of sequence reads for copy number analysis. If the resulting Variant_copies are very low, the variant allele frequencies were probably provided as fraction, not percentage. Just multiply by 100. If your data contains sex chromosomes, then make sure to specify sgc = c("X", "Y") when analyzing data from a male individual.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

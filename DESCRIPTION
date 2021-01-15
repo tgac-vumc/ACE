@@ -3,7 +3,7 @@ Title: Absolute Copy Number Estimation from Low-coverage Whole Genome
         Sequencing
 Description: Uses segmented copy number data to estimate tumor cell percentage 
     and produce copy number plots displaying absolute copy numbers.
-Version: 1.9.0
+Version: 1.9.1
 Author: Jos B Poell
 Maintainer: Jos B Poell <j.poell@amsterdamumc.nl>
 Depends: R (>= 3.4)
@@ -15,7 +15,7 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/tgac-vumc/ACE
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Suggests: knitr, rmarkdown, BiocStyle
 VignetteBuilder: knitr
 NeedsCompilation: no

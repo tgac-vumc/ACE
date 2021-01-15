@@ -9,7 +9,7 @@ Calculate potential fits for a single sample
 }
 \usage{
 singlemodel(template, QDNAseqobjectsample = FALSE, ploidy = 2, 
-            standard, method = 'RMSE', exclude = c(), 
+            standard, method = 'RMSE', exclude = c(), sgc = c(), 
             penalty = 0, highlightminima = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -20,6 +20,7 @@ singlemodel(template, QDNAseqobjectsample = FALSE, ploidy = 2,
   \item{standard}{Numeric. Force the given ploidy to represent this raw value. When omitted, the standard will be calculated from the data}
   \item{method}{String character specifying which error method to use. For more documentation, consult the vignette. Can be "RMSE", "SMRE", or "MAE". Default = "RMSE"}
   \item{exclude}{Integer or character vector. Specifies which chromosomes to exclude for model fitting}
+  \item{sgc}{Integer or character vector. Specifies which chromosomes occur with only a single copy in the germline}
   \item{penalty}{Numeric value. Penalizes fits at lower cellularities. Suggested values between 0 and 1. Default = 0 (no penalty)}
   \item{highlightminima}{Logical. Minima are highlighted in the errorplot by a red color. Default = TRUE}
 }
@@ -42,13 +43,13 @@ Returns a list, containing
 Jos B. Poell
 }
 \note{
-singlemodel() only needs a data frame with columns named \code{chr} and \code{segments}. Every row should contain an individual genomic feature, i.e. a bin or a probe. If you have data with each row representing a segment, and the size of the segment given in a column (e.g. NumBins or NumProbes), you can create the data frame as follows (giving the correct variable names of course):
+singlemodel() only needs a data frame with columns named \code{chr} and \code{segments}. Every row should contain an individual genomic feature, i.e. a bin or a probe. If you have data with each row representing a segment, and the size of the segment given in a column (e.g. NumBins or NumProbes), you can create the data frame as follows:
 
-\code{chr <- rep(Chromosome, NumProbes)}
+\code{template <- data.frame(chr = rep(Chromosome, NumProbes), segments = rep(SegmentMean, NumProbes))}
 
-\code{segments <- rep(SegmentMean, NumProbes)}
+Alternatively you can look into \code{\link{segmentstotemplate}}.
 
-\code{template <- cbind(chr, segments)}
+If your data contains sex chromosomes and you do not exclude them from model fitting, then make sure to specify \code{sgc = c("X", "Y")} when analyzing data from a male individual.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

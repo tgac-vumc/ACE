@@ -16,7 +16,7 @@ executed by \code{ploidyplotloop}, which handles one QDNAseq-object at a time.
 runACE(inputdir = "./", outputdir, filetype = 'rds', genome = 'hg19',
   binsizes, ploidies = 2, imagetype = 'pdf', method = 'RMSE', penalty = 0, 
   cap = 12, bottom = 0, trncname = FALSE, printsummaries = TRUE, 
-  autopick = FALSE)
+  savereadcounts = FALSE, autopick = FALSE)
   
 ploidyplotloop(copyNumbersSegmented, currentdir, ploidies = 2, 
   imagetype = 'pdf', method = 'RMSE', penalty = 0, cap = 12, 
@@ -38,6 +38,7 @@ ploidyplotloop(copyNumbersSegmented, currentdir, ploidies = 2,
   \item{cap, bottom}{Integer. Influences your output copy number graphs. The upper and lower limits of the y-axis are set at these values. Bins and segments that exceed/subceed the cap/bottom are represented by a special mark. Default = 12 and 0 respectively}
   \item{trncname}{Logical. Convenience functionality. If all your samples have a certain extension to their name, you can use this to truncate this extension and be left with the actual sample name. When TRUE, the regular expression is "_.*". That means it will chop off everything from the sample name starting with the first underscore. Instead of a logical, you can specify a character string to match your regular expression of choice. You can test whether it will work with the gsub function, since this is what ACE uses to truncate names. Default = FALSE}
   \item{printsummaries}{Logical. If you do not want the big summary files, you can set this argument to FALSE. If you still want the summary files containing only error plots, you can set this to 2. Default = TRUE}
+  \item{savereadcounts}{Logical. When set to TRUE, readCounts-objects will be saved. Default = FALSE}
   \item{autopick}{Logical. When set to TRUE, ACE will fill in the cellularity of the best fit in the column likely_fit of the fitpicker file(s). Default = FALSE}
 }
 \details{

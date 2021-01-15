@@ -1,3 +1,11 @@
+Changes in version 1.9.1 (2021-01-15)
+-------------------------------------
+
+o accommodating fitting of chromosomes with only a single germline copy (e.g. X and Y in males)
+o added the option the specify which cellularities to include in squaremodel
+o option to save readCounts-object in runACE
+
+
 Changes in version 1.5.2 (2020-04-14)
 -------------------------------------
 

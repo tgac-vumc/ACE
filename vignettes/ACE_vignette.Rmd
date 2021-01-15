@@ -352,6 +352,10 @@ This parameter was added to penalize fits at lower cellularities. A prime exampl
 * If the argument "onlyautosomes" is available, setting this to FALSE will include data from all other chromosomes.
 * If the argument "chrsubset" is available, you can use this to specify which chromosomes should be included in the analysis. In plotting functions, you cannot "skip" chromosomes. For instance, chrsubset = c(3:7, 10:12) will plot chromosomes 3 through 12.
 
+## Sex chromosomes
+
+Sex chromosomes may introduce biases in fitting, and were therefore excluded in the first versions of ACE. However ... the fact that males only have a single germline X chromosome can help out in determining fits. By the same token, not accounting for this will give erroneous results when including sex chromosomes in the plots. This is also an issue when associating variant allele frequencies with copy number data, when variants are located on the X chromosome. The package now contains an argument to correct for this: sgc, short for single germline copy. With this argument you can specify which chromosomes are only present with one germline copy. So when analyzing copy number data of a male individual, specify sgc = c("X", "Y"). The following functions have this option: singlemodel, squaremodel, singleplot, ACEcall, getadjustedsegments, analyzegenomiclocations, and linkvariants. Since it is necessary to know up front for which samples to use this argument, it has not been included in functions that analyze all samples in an object. An exception is postanalysisloop, because this function already uses per sample information. It is possible to add gender information to the input models using the genderci option. Please consult the documentation.
+
 # Additional Functionality (accessory functions)
 
 Detailed information and examples for below functions can be found in their respective documentation

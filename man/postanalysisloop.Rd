@@ -15,7 +15,7 @@ postanalysisloop(copyNumbersSegmented, modelsfile, variantdata,
                  confidencelevel=FALSE, append=TRUE,
                  dontmatchnames=FALSE, printsegmentfiles=TRUE,
                  printnewplots=TRUE, imagetype='pdf',
-                 outputdir="./", log=FALSE, segext='tsv')
+                 outputdir="./", log=FALSE, segext='tsv', genderci)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,6 +42,7 @@ postanalysisloop(copyNumbersSegmented, modelsfile, variantdata,
   \item{outputdir}{Character string. Save output into this custom directory. Default = "./"}
   \item{log}{Logical or integer. Use log conversion for creating segments output. Default = FALSE}
   \item{segext}{Character string specifying the extension for the segments output. Default = "tsv"}
+  \item{genderci}{Integer. Column index in modelsfile or data frame specifying the gender of the corresponding sample. See note}
 }
 \details{
 If your input is tailored for this function, you could run it without any arguments! Most arguments help with matching sample names in the QDNAseq-object, the modelsfile, and the names and columns of the files containing variant data. You can "trim" the name of the file with variant data using the \code{prefix} (everything before the name) and \code{postfix} (everything after the name, but before the file extension) arguments to match your sample names. \code{trncname} migth help trimming the name in the QDNAseq-object, but be sure it still matches the sample names in the modelsfile (and mutation data file names when applicable). 
@@ -55,6 +56,8 @@ Jos B. Poell
 }
 \note{
 The use of \code{inputdir} and \code{outputdir} should be fairly robust. However, using irregular file paths might cause problems. If you suspect problems with file paths, try setting the working directory to the intended \code{inputdir}.
+
+If you intend to plot or analyze variant data on sex chromosomes, make sure you specify the gender of each individual using the genderci option. The function will look for the gender in the indicated column number of the modelsfile (or data frame). Suggested indication within this column is "M" for male and "F" for female. When missing, the function defaults to "F".
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

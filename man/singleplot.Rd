@@ -11,7 +11,7 @@ Plot an absolute copy number profile for a single sample
 singleplot(template, QDNAseqobjectsample = FALSE, 
   cellularity = 1, error, ploidy = 2, standard, title, 
   trncname = FALSE, cap = 12, bottom = 0, chrsubset, 
-  onlyautosomes = TRUE)
+  onlyautosomes = TRUE, sgc = c())
 }
 \arguments{
   \item{template}{Object. Either a data frame as created by \code{\link{objectsampletotemplate}}, or a QDNAseq-object}
@@ -26,6 +26,7 @@ singleplot(template, QDNAseqobjectsample = FALSE,
   \item{bottom}{Integer. Similar to cap, but for the lower limit of the y-axis. When set to "min", it sets the bottom to the minimum absolute copynumber value, rounded down. Bins and segments that subceed the bottom are represented by a special mark. Default = 0}
   \item{chrsubset}{Integer vector. Specify the chromosomes you want to plot. It will always take the full range of chromosomes in your subset, so specifying chrsubset = c(4, 8) will give the same plot as chrsubset = 4:8. When using a subset, singleplot will not plot the cellularity and error on the plot. Therefore, you can use this to make a copy number plot without this information by specifying chrsubset = 1:22}
   \item{onlyautosomes}{Logical or integer. You can fill in an integer to specify how many autosomes your species has. When TRUE, \code{singleplot} defaults to 22 (human) autosomes. When FALSE, \code{singleplot} will also plot whichever other chromosomes are specified in the template, e.g. "X", "Y", "MT". You can combine this argument with chrsubset, for instance chrsubset[1:23] to only include chromosome X (provided this is the 23rd chromosome)}
+  \item{sgc}{Integer or character vector. Specify which chromosomes occur with only a single copy in the germline}
 }
 
 \value{
@@ -38,6 +39,8 @@ Jos B. Poell
 
 \note{
   \code{singleplot} expects chromosome names, as specified in the \code{chr} column of the template, to be either just the integer chromosome number, or "chr" followed by the chromosome number. This is strictly required when onlyautosomes = TRUE.
+  
+  When plotting sex chromosomes, make sure to specify \code{sgc = c()} when plotting the copy number profile of a male individual.
 }
 
 \seealso{
