@@ -19,7 +19,7 @@ templatefromequalsegments(template, QDNAseqobjectsample = FALSE,
   \item{equalsegments}{Integer. \code{templatefromequalsegments} "resegments" simply by creating segments containing as many bins as specified in this argument. Default = 20}
   \item{funtype}{Character string. Specifies the function used to calculate new segment values. Alternative is "median". Default = "mean"}
   \item{chrsubset}{Integer vector. Specify the chromosomes you want to resegment}
-  \item{onlyautosomes}{Logical or integer. You can fill in an integer to specify how many autosomes your species has. When TRUE, \code{twosamplecompare} defaults to 22 (human) autosomes. When FALSE, \code{templatefromequalsegments} will also resegment whichever other chromosomes are specified in the template, e.g. "X", "Y", "MT"}
+  \item{onlyautosomes}{Logical or integer. You can fill in an integer to specify how many autosomes your species has. When TRUE, \code{templatefromequalsegments} defaults to 22 (human) autosomes. When FALSE, \code{templatefromequalsegments} will also resegment whichever other chromosomes are specified in the template, e.g. "X", "Y", "MT"}
 }
 \details{
 \code{templatefromequalsegments} resegments the input template chromosome by chromosome. It makes segments with the number of bins specified in the argument equalsegments. Any leftover bins are divided equally among all newly created segments. Only bins with values (!is.na) are considered. If there are fewer bins on a chromosome than two times the specified value, then all bins of this chromosome are put in a single segment.

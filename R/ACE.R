@@ -449,7 +449,7 @@ objectsampletotemplate <- function(copyNumbersSegmented, index = 1) {
 # you can use a QDNAseq object as "template", then specify QDNAseqobjectsample by the sample number!
 # e.g. model <- singlemodel(copyNumbersSegmented, QDNAseqobjectsample = 3)
 singlemodel <- function(template,QDNAseqobjectsample = FALSE, ploidy = 2, standard, method = 'RMSE', 
-                        exclude = c(), sgc = c(), penalty = 0, highlightminima = TRUE) {
+                        exclude = c("X","Y"), sgc = c(), penalty = 0, highlightminima = TRUE) {
   if(QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
   template <- template[!template$chr %in% exclude,]
   if(missing(standard) || !is(standard, "numeric")) { standard <- median(template$segments, na.rm = T) }
@@ -551,7 +551,7 @@ singlemodel <- function(template,QDNAseqobjectsample = FALSE, ploidy = 2, standa
 # To make the minima pop out, the color code is the inverse of the relative error
 # Minima are found by checking each value for neighboring values, and will only return true if its the lowest error
 squaremodel <- function(template, QDNAseqobjectsample = FALSE, prows=100, ptop=5, pbottom=1, method = 'RMSE',
-                        exclude = c(), sgc = c(), penalty = 0, penploidy = 0, 
+                        exclude = c("X","Y"), sgc = c(), penalty = 0, penploidy = 0, 
                         cellularities = seq(5,100), highlightminima = TRUE, standard) {
   if(QDNAseqobjectsample) {template <- objectsampletotemplate(template, QDNAseqobjectsample)}
   template <- template[!template$chr %in% exclude,]

@@ -35,6 +35,7 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   colnames(df)[3] <- "copynumbers"
   colnames(df)[4] <- "segments"
   
+  chosenchr <- as.vector(unique(df$chr))
   dfna <- na.exclude(df)
   bin <- dfna$bin
   copynumbers <- dfna$copynumbers
@@ -44,7 +45,7 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   if(!missing(chrsubset)){
     firstchr <- range(chrsubset)[1]
     lastchr <- range(chrsubset)[2]
-    dfna <- dfna[dfna$chr %in% rlechr$values[seq(firstchr,lastchr)],]
+    dfna <- dfna[dfna$chr %in% chosenchr[seq(firstchr,lastchr)],]
   }
   segmentdata <- rle(as.vector(paste0(dfna$chr, "_", dfna$segments)))
   num_bins <- segmentdata$lengths
@@ -122,6 +123,16 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   df$color <- rep('black',length(df$bin))
   df$color[dfna$bin] <- color # templatena$color
   dfna <- na.exclude(df)
+
+  if (onlyautosomes==TRUE) {
+    chosenchr <- seq(1,22)
+  } else if (onlyautosomes!=FALSE) {
+    chosenchr <- seq(1, onlyautosomes)
+  }
+  if (!missing(chrsubset)) {
+    chosenchr <- chosenchr[chosenchr %in% chrsubset]
+  }
+  df <- df[df$chr %in% chosenchr, ]
   
   if(plot==TRUE){
     if(onlyautosomes==TRUE) {
@@ -204,7 +215,7 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
                              template2, index2=FALSE, ploidy2=2, cellularity2=1, standard2, name2,
                              equalsegments=FALSE, altmethod=FALSE, cap=12, qcap=12, bottom=0, 
                              plot=TRUE, trncname=FALSE, legend=TRUE, chrsubset, onlyautosomes=TRUE,
-                             showcorrelation=TRUE) {
+                             sgc=c(),showcorrelation=TRUE) {
   if (missing(template2)) {template2<-template1}
   if(index1) {
     pd1<-Biobase::pData(template1)
@@ -221,17 +232,30 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
     if(missing(name2)) {name2<-pd2$name[index2]}
   } else if(missing(name2)) {name2<-"sample2"}
   if(nrow(template1)!=nrow(template2)){print("bins not matching")}
+  
+  gc <- rep(2, nrow(template1))
+  gc[template1$chr %in% sgc] <- 1
+  
   na1 <- apply(template1, 1, function(x) {any(is.na(x))})
   na2 <- apply(template2, 1, function(x) {any(is.na(x))})
   template1na <- template1[!(na1 | na2), ]
   template2na <- template2[!(na1 | na2), ]
-  segmentdata1 <- rle(as.vector(na.exclude(template1na$segments)))
-  segmentdata2 <- rle(as.vector(na.exclude(template2na$segments)))
-  if(missing(standard1) || !is(standard1, "numeric")) { standard1 <- median(rep(segmentdata1$values,segmentdata1$lengths)) }
-  adjustedcopynumbers1 <- ploidy1 + ((template1na$copynumbers-standard1)*(cellularity1*(ploidy1-2)+2))/(cellularity1*standard1)
+  # segmentdata1 <- rle(as.vector(na.exclude(template1na$segments)))
+  segmentdata1 <- rle(as.vector(paste0(template1na$chr, "_", template1na$segments)))
+  segmentdata2 <- rle(as.vector(paste0(template2na$chr, "_", template2na$segments)))
+  if(missing(standard1) || !is(standard1, "numeric")) { 
+    # standard1 <- median(rep(segmentdata1$values,segmentdata1$lengths))
+    standard1 <- median(template1na$segments)
+  }
+  # adjustedcopynumbers1 <- ploidy1 + ((template1na$copynumbers-standard1)*(cellularity1*(ploidy1-2)+2))/(cellularity1*standard1)
+  adjustedcopynumbers1 <- template1$copynumbers*(ploidy1+2/cellularity1-2)/standard1 - gc/cellularity1 + gc
   adjcnna1 <- as.vector(na.exclude(adjustedcopynumbers1))
-  if(missing(standard2) || !is(standard2, "numeric")) { standard2 <- median(rep(segmentdata2$values,segmentdata2$lengths)) }
-  adjustedcopynumbers2 <- ploidy2 + ((template2na$copynumbers-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
+  if(missing(standard2) || !is(standard2, "numeric")) { 
+    # standard2 <- median(rep(segmentdata2$values,segmentdata2$lengths))
+    standard2 <- median(template2na$segments)
+  }
+  # adjustedcopynumbers2 <- ploidy2 + ((template2na$copynumbers-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
+  adjustedcopynumbers2 <- template2$copynumbers*(ploidy2+2/cellularity2-2)/standard2 - gc/cellularity2 + gc
   adjcnna2 <- as.vector(na.exclude(adjustedcopynumbers2))
 
   bin <- template1na$bin
@@ -401,7 +425,18 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
   }
   q_value <- p.adjust(p_value,method="BH")
   combinedsegmentsdf <- data.frame(Chromosome,Start,End,Num_Bins,Mean1,SE1,Mean2,SE2,p_value,q_value)
+  chosenchr <- as.vector(unique(combinedsegmentsdf$Chromosome))
+  if (onlyautosomes==TRUE) {
+    chosenchr <- seq(1,22)
+  } else if (onlyautosomes!=FALSE) {
+    chosenchr <- seq(1, onlyautosomes)
+  }
+  if (!missing(chrsubset)) {
+    chosenchr <- chosenchr[chosenchr %in% chrsubset]
+  }
+  combinedsegmentsdf <- combinedsegmentsdf[combinedsegmentsdf$Chromosome %in% chosenchr,]
   correlation <- cor(rep(Mean1,Num_Bins),rep(Mean2,Num_Bins))
+  subsetcorrelation <- with(combinedsegmentsdf, cor(rep(Mean1,Num_Bins),rep(Mean2, Num_Bins)))
   if (plot==TRUE) {
     if(bottom=="min"){bottom<-floor(min(Mean1, Mean2))}
     if(cap=="max"){cap<-ceiling(max(Mean1, Mean2))}
@@ -414,7 +449,7 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       rlechr <- rle(as.vector(template1$chr))
       df <- df[df$chr %in% rlechr$values[seq(firstchr,lastchr)],]
     }
-    subsetcorrelation <- cor(df$Mean1,df$Mean2)
+    
     if(onlyautosomes==TRUE) {
       rlechr <- rle(as.vector(template1$chr[template1$chr %in% seq(1,22)]))
     }	else if (onlyautosomes==FALSE) {rlechr <- rle(as.vector(template1$chr))
@@ -451,8 +486,9 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
           annotate("text", x = binchrend[2], y = cap-0.2, label = name1, color = 'red') +
           annotate("text", x = binchrend[2], y = cap-0.6, label = name2, color = 'blue')
         if (showcorrelation==TRUE) {
+          
           compareplot <- compareplot +
-            annotate("text", x = binchrend[2], y = cap-1, label = paste0("r = ",round(correlation,digits=3)), color = 'black')
+            annotate("text", x = binchrend[2], y = cap-1, label = paste0("r = ",round(subsetcorrelation,digits=3)), color = 'black')
         }
       }
     } else {
@@ -487,7 +523,7 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       }
     }  
     
-    if (!missing(chrsubset)) {
+    if (!missing(chrsubset) || onlyautosomes != FALSE) {
       return(list(twosampledf=combinedsegmentsdf,
                   correlation=correlation,
                   subsetcorrelation=subsetcorrelation,

@@ -47,7 +47,7 @@ The color code in the plot is as follows (in parentheses the call in the data fr
   }
 }
 \value{
-ACEcall returns a data frame that is similar to the input template, but it is supplemented with adjusted copy numbers, adjusted segment values, the segment mean and associated standard error, and the log10 p-value and q-value, which signifies the probability that if the true segment mean equals the general tumor ploidy (rounded to an integer), the resulting or a more extreme segment mean would be found. The q-value is the result of a Benjamini-Hochberg correction of the p-value, taking into account all tested segments. If the argument plot = TRUE, ACEcall will also return an absolute copy number plot (a ggplot2-object) with the segments color-coded to specify the calls. 
+ACEcall returns a data frame that is similar to the input template, but it is supplemented with adjusted copy numbers, adjusted segment values, the segment mean and associated standard error, and the log10 p-value and q-value, which signifies the probability that if the true segment mean equals the general tumor ploidy (rounded to an integer), the resulting or a more extreme segment mean would be found. The q-value is the result of a Benjamini-Hochberg correction of the p-value, taking into account all tested segments. Output is restricted to the specified chromosomal subset. If the argument plot = TRUE, ACEcall will also return an absolute copy number plot (a ggplot2-object) with the segments color-coded to specify the calls. 
 }
 \author{
 Jos B. Poell

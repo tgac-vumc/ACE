@@ -9,8 +9,8 @@ Calculate potential fits for a single sample using ploidy as a variable
 }
 \usage{
 squaremodel(template, QDNAseqobjectsample = FALSE, prows=100, 
-  ptop=5, pbottom=1, method = 'RMSE', exclude = c(), sgc = c(),
-  penalty = 0, penploidy = 0, cellularities = seq(5,100), 
+  ptop=5, pbottom=1, method = 'RMSE', exclude = c("X", "Y"), 
+  sgc = c(), penalty = 0, penploidy = 0, cellularities = seq(5,100), 
   highlightminima = TRUE, standard)
 }
 
@@ -21,7 +21,7 @@ squaremodel(template, QDNAseqobjectsample = FALSE, prows=100,
   \item{ptop}{Numeric. Sets the highest ploidy at which to start testing fits. Default = 5}
   \item{pbottom}{Numeric. Sets the lowest ploidy to be tested. Default = 1}
   \item{method}{Character string specifying which error method to use. For more documentation, consult the vignette. Can be "RMSE", "SMRE", or "MAE". Default = "RMSE"}
-  \item{exclude}{Integer or character vector. Specifies which chromosomes to exclude for model fitting}
+  \item{exclude}{Integer or character vector. Specifies which chromosomes to exclude for model fitting. Default = c("X", "Y")}
   \item{sgc}{Integer or character vector. Specifies which chromosomes occur with only a single copy in the germline}
   \item{penalty}{Numeric. Penalizes fits at lower cellularities. Suggested values between 0 and 1. Default = 0 (no penalty)}
   \item{penploidy}{Numeric. Penalizes fits that diverge from 2N with the formula (1+abs(ploidy-2))^penploidy. Default = 0}
@@ -55,7 +55,7 @@ squaremodel() only needs a data frame with columns named \code{chr} and \code{se
 
 Alternatively you can look into \code{\link{segmentstotemplate}}.
 
-If your data contains sex chromosomes and you do not exclude them from model fitting, then make sure to specify \code{sgc = c("X", "Y")} when analyzing data from a male individual.
+If your data contains sex chromosomes and you wish to include these for model fitting, then make sure to specify \code{exclude = c()}, and \code{sgc = c("X", "Y")} when analyzing data from a male individual.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

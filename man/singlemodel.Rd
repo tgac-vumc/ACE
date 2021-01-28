@@ -9,8 +9,8 @@ Calculate potential fits for a single sample
 }
 \usage{
 singlemodel(template, QDNAseqobjectsample = FALSE, ploidy = 2, 
-            standard, method = 'RMSE', exclude = c(), sgc = c(), 
-            penalty = 0, highlightminima = TRUE)
+            standard, method = 'RMSE', exclude = c("X","Y"), 
+            sgc = c(), penalty = 0, highlightminima = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,7 +19,7 @@ singlemodel(template, QDNAseqobjectsample = FALSE, ploidy = 2,
   \item{ploidy}{Integer. Calculate fits assuming the median of segments has this absolute copy number. Default = 2}
   \item{standard}{Numeric. Force the given ploidy to represent this raw value. When omitted, the standard will be calculated from the data}
   \item{method}{String character specifying which error method to use. For more documentation, consult the vignette. Can be "RMSE", "SMRE", or "MAE". Default = "RMSE"}
-  \item{exclude}{Integer or character vector. Specifies which chromosomes to exclude for model fitting}
+  \item{exclude}{Integer or character vector. Specifies which chromosomes to exclude for model fitting. Default = c("X", "Y")}
   \item{sgc}{Integer or character vector. Specifies which chromosomes occur with only a single copy in the germline}
   \item{penalty}{Numeric value. Penalizes fits at lower cellularities. Suggested values between 0 and 1. Default = 0 (no penalty)}
   \item{highlightminima}{Logical. Minima are highlighted in the errorplot by a red color. Default = TRUE}
@@ -49,7 +49,7 @@ singlemodel() only needs a data frame with columns named \code{chr} and \code{se
 
 Alternatively you can look into \code{\link{segmentstotemplate}}.
 
-If your data contains sex chromosomes and you do not exclude them from model fitting, then make sure to specify \code{sgc = c("X", "Y")} when analyzing data from a male individual.
+If your data contains sex chromosomes and you wish to include these for model fitting, then make sure to specify \code{exclude = c()}, and \code{sgc = c("X", "Y")} when analyzing data from a male individual.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

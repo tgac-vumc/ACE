@@ -13,7 +13,8 @@ twosamplecompare(template1, index1 = FALSE, ploidy1 = 2,
   ploidy2 = 2, cellularity2 = 1, standard2, name2,
   equalsegments = FALSE, altmethod = FALSE, cap = 12, qcap = 12, 
   bottom = 0, plot = TRUE, trncname = FALSE, legend = TRUE, 
-  chrsubset, onlyautosomes = TRUE, showcorrelation = TRUE)
+  chrsubset, onlyautosomes = TRUE, sgc = c(),
+  showcorrelation = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,6 +40,7 @@ twosamplecompare(template1, index1 = FALSE, ploidy1 = 2,
   \item{legend}{Logical. Add the legend to the two-sample plot. Default = TRUE}
   \item{chrsubset}{Integer vector. Specify the chromosomes you want to plot. It will always take the full range of chromosomes in your subset, so specifying chrsubset = c(4, 8) will give the same plot as chrsubset = 4:8. When using a subset, \code{twosamplecompare} will not plot the cellularity and error on the plot.}
   \item{onlyautosomes}{Logical or integer. You can fill in an integer to specify how many autosomes your species has. When TRUE, \code{twosamplecompare} defaults to 22 (human) autosomes. When FALSE, \code{twosamplecompare} will also plot whichever other chromosomes are specified in the template, e.g. "X", "Y", "MT"}
+  \item{sgc}{Integer or character vector. Specify which chromosomes occur with only a single copy in the germline. Note that this is assumed for both samples.}
   \item{showcorrelation}{Logical. Add the correlation to the two-sample plot. Default = TRUE}
 }
 \details{
@@ -57,7 +59,9 @@ This function can be used for different types of comparisons. It can be used to 
 Jos B. Poell
 }
 \note{
-The dataframe returned by this function always contains all segments, even when the argument chrsubset is used. However, if there is no useful data for an entire chromosome, it will not constitute a segment and thus be excluded from the data frame, even though the chromsome may be included in the plot. If you want to know the correlation of segments of a subset of chromosomes, you need to have the argument plot = TRUE, because this particular correlation number is calculated in the plot loop. If you do not want to render the plot, you can follow the closing parenthesis of the function call with $subsetcorrelation. If you want to get rid of the green significance bars in the plot, you can set qcap = 0. If you insist on getting rid of the entire secondary axis, save the plot to an object, then run: plotobject + scale_y_continuous(name = "copies", sec.axis = sec_axis(~., labels = NULL), expand = c(0,0))
+The data frame, plot, and subsetcorrelation all use the same selection of chromosomes. The correlation in the plot corresponds to the displayed chromosomes. Note that the returned value \code{correlation} uses all segments in the data, also from the sex chromosomes when available. However, if there is no useful data for an entire chromosome, it will not constitute a segment and thus be excluded from the data frame, even though the chromsome may be included in the plot. 
+
+If you want to get rid of the green significance bars in the plot, you can set qcap = 0. If you insist on getting rid of the entire secondary axis, save the plot to an object, then run: plotobject + scale_y_continuous(name = "copies", sec.axis = sec_axis(~., labels = NULL), expand = c(0,0))
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

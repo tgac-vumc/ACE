@@ -1,8 +1,16 @@
+Changes in version 1.9.3 (2021-01-28)
+-------------------------------------
+
+o Now defaulting to exclude sex chromosomes from model fitting
+o Also included sgc argument in twosamplecompare
+o Data frame output of ACEcall and twosamplecompare are now restricted to selected chromosomes
+
+
 Changes in version 1.9.1 (2021-01-15)
 -------------------------------------
 
 o accommodating fitting of chromosomes with only a single germline copy (e.g. X and Y in males)
-o added the option the specify which cellularities to include in squaremodel
+o added the option to specify which cellularities to include in squaremodel
 o option to save readCounts-object in runACE
 
 
