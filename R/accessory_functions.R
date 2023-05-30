@@ -215,7 +215,16 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
                              template2, index2=FALSE, ploidy2=2, cellularity2=1, standard2, name2,
                              equalsegments=FALSE, altmethod=FALSE, cap=12, qcap=12, bottom=0, 
                              plot=TRUE, trncname=FALSE, legend=TRUE, chrsubset, onlyautosomes=TRUE,
-                             sgc=c(),showcorrelation=TRUE) {
+                             sgc=c(),showcorrelation=TRUE,quieterrors=TRUE) {
+
+  # Error handler for errors produced by stat functions when those tests fail
+  # These would meant that the test is invalid and it should produce p.value of 1
+  # so we return that here for convenience, by default
+  stat_test_error_handler <- function(err) {
+    if (!quieterrors) {warning(geterrmessage())}
+    return(1)
+  }
+
   if (missing(template2)) {template2<-template1}
   if(index1) {
     pd1<-Biobase::pData(template1)
@@ -304,9 +313,16 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       if(altmethod=="MAD"){Mean2[i] <- median(template2na$copynumbers[seq(primer,allsegments[i])])}
       SE2[i] <- sd(template2na$copynumbers[seq(primer,allsegments[i])])/sqrt(Num_Bins[i])
       if(altmethod=="MAD"){SE2[i] <- mad(template2na$copynumbers[seq(primer,allsegments[i])])/sqrt(Num_Bins[i])}
-      if (Num_Bins[i]>1) {p_value[i] <- t.test(template1na$copynumbers[seq(primer,allsegments[i])],
-                                               template2na$copynumbers[seq(primer,allsegments[i])])$p.value
-      } else {p_value[i]<-1}
+      if (Num_Bins[i] > 1) {
+        p_value[i] <- {
+          tryCatch({
+            t.test(
+              template1na$copynumbers[seq(primer, allsegments[i])],
+              template2na$copynumbers[seq(primer, allsegments[i])]
+            )$p.value
+          }, error = stat_test_error_handler)
+        }
+      } else {p_value[i] <- 1}
       primer <- allsegments[i]+1
     }
     if(altmethod=="SD"){
@@ -322,8 +338,11 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       for (i in seq_along(allsegments)) {
         cn1 <- (template1na$copynumbers[seq(primer,allsegments[i])]-ns1)/sd1
         cn2 <- (template2na$copynumbers[seq(primer,allsegments[i])]-ns2)/sd2
-        if (Num_Bins[i]>1) {p_value[i] <- t.test(cn1,cn2)$p.value
-        } else {p_value[i]<-1}
+        if (Num_Bins[i] > 1) {
+          p_value[i] <- {
+            tryCatch({t.test(cn1, cn2)$p.value}, error = stat_test_error_handler)
+          }
+        } else {p_value[i] <- 1}
         primer <- allsegments[i]+1
       }
     }
@@ -340,7 +359,10 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
       for (i in seq_along(allsegments)) {
         cn1 <- (template1na$copynumbers[seq(primer,allsegments[i])]-ns1)/mad1
         cn2 <- (template2na$copynumbers[seq(primer,allsegments[i])]-ns2)/mad2
-        if (Num_Bins[i]>1) {p_value[i] <- wilcox.test(cn1,cn2)$p.value
+        if (Num_Bins[i]>1) {
+          p_value[i] <- {
+            tryCatch({wilcox.test(cn1, cn2)$p.value}, error = stat_test_error_handler)
+          }
         } else {p_value[i]<-1}
         primer <- allsegments[i]+1
       }
@@ -379,8 +401,12 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
           SE1[segmentcounter + i] <- sd(template1na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])/sqrt(nobs[i])
           Mean2[segmentcounter + i] <- mean(template2na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])
           SE2[segmentcounter + i] <- sd(template2na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])/sqrt(nobs[i])
-          p_value[segmentcounter + i] <- t.test(template1na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)],
+          p_value[segmentcounter + i] <- {
+            tryCatch({
+              t.test(template1na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)],
                                                 template2na$copynumbers[seq(bincounter, bincounter+nobs[i]-1)])$p.value
+            }, error = stat_test_error_handler)
+          }
           bincounter <- bincounter + nobs[i]
         }
       }
@@ -400,8 +426,13 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
         lastbin <- which(template1na$chr==Chromosome[i] & template1na$end==End[i])
         cn1 <- (template1na$copynumbers[seq(firstbin, lastbin)]-ns1)/sd1
         cn2 <- (template2na$copynumbers[seq(firstbin, lastbin)]-ns2)/sd2
-        if (Num_Bins[i]>1) {p_value[i] <- t.test(cn1,cn2)$p.value
-        } else {p_value[i]<-1}
+        if (Num_Bins[i] > 1) {
+          p_value[i] <- {
+            tryCatch({
+              t.test(cn1, cn2)$p.value
+            }, error = stat_test_error_handler)
+          }
+        } else {p_value[i] <- 1}
       }
     }
     if(altmethod=="MAD"){
@@ -418,7 +449,10 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
         lastbin <- which(template1na$chr==Chromosome[i] & template1na$end==End[i])
         cn1 <- (template1na$copynumbers[seq(firstbin,lastbin)]-ns1)/mad1
         cn2 <- (template2na$copynumbers[seq(firstbin,lastbin)]-ns2)/mad2
-        if (Num_Bins[i]>1) {p_value[i] <- wilcox.test(cn1,cn2)$p.value
+        if (Num_Bins[i]>1) {
+          p_value[i] <- {
+            tryCatch({wilcox.test(cn1, cn2)$p.value}, error = stat_test_error_handler)
+          }
         } else {p_value[i]<-1}
       }
     }
