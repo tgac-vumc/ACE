@@ -287,7 +287,7 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
 
   		plots <- vector(mode = 'list', length = (length(minima)))
   		
-  		bfi <- tail(which(rerror==min(rerror)))
+  		bfi <- tail(which(rerror==min(rerror)), n = 1)
   		
   		fitpicker[a,1] <- pd$name[a]
   		if (autopick==TRUE) { fitpicker[a,2] <- minima[bfi] }	else { fitpicker[a,2] <- "" }
@@ -1186,3 +1186,4 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     }
   }
 }
+
