@@ -322,8 +322,8 @@ ploidyplotloop <- function(copyNumbersSegmented,currentdir,ploidies=2,imagetype=
   		  tempplot <- ggplot2::ggplot() +
     			scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom,cap), expand=c(0,0)) +
     			scale_x_continuous(name = "chromosome", limits = c(0,binchrend[lastchr]), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-    			geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
-    			geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', size = 0.5) +
+    			geom_hline(yintercept = seq(0,4), color = '#333333', linewidth = 0.5) +
+    			geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', linewidth = 0.5) +
     			geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
     			geom_point(aes(x = bin,y = copynumbers),data=dfna[dfna$copynumbers>bottom&dfna$copynumbers<cap,], size = 0.1, color = 'black') +
   		    geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
@@ -671,7 +671,7 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
   gc <- rep(2, nrow(template))
   gc[template$chr %in% sgc] <- 1
   if(missing(title)) {title <- "Plot"}
-  if(missing(standard) || !is(standard, "numeric")) { standard <- median(template$segments, na.rm = T) }
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(template$segments[!template$chr %in% c("X", "Y")], na.rm = T) }
   # formula below is a simplification of the one that is commented out
   adjustedcopynumbers <- template$copynumbers*(ploidy+2/cellularity-2)/standard - gc/cellularity + gc
   adjustedsegments <- template$segments*(ploidy+2/cellularity-2)/standard - gc/cellularity + gc
@@ -727,8 +727,8 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
     ggplot2::ggplot() +
       scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom,cap), expand=c(0,0)) +
       scale_x_continuous(name = "chromosome", limits = c(0,tail(binchrend,1)), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-      geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
-      geom_hline(yintercept = seq(5,(cap-1)), color = 'lightgray', size = 0.5) +
+      geom_hline(yintercept = seq(0,4), color = '#333333', linewidth = 0.5) +
+      geom_hline(yintercept = seq(5,(cap-1)), color = 'lightgray', linewidth = 0.5) +
       geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
       geom_point(aes(x = bin,y = copynumbers),data=dfna[dfna$copynumbers>bottom&dfna$copynumbers<cap,], size = 0.1, color = 'black') +
       geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
@@ -752,8 +752,8 @@ singleplot <- function(template, QDNAseqobjectsample = FALSE, cellularity = 1, e
       scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), 
                          breaks = binchrmdl[seq(firstchr,lastchr)], 
                          labels = rlechr$values[seq(firstchr,lastchr)], expand = c(0,0)) +
-      geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
-      geom_hline(yintercept = seq(5,(cap-1)), color = 'lightgray', size = 0.5) +
+      geom_hline(yintercept = seq(0,4), color = '#333333', linewidth = 0.5) +
+      geom_hline(yintercept = seq(5,(cap-1)), color = 'lightgray', linewidth = 0.5) +
       geom_vline(xintercept = binchrend[seq(firstchr,lastchr)], color = "#666666", linetype = "dashed") +
       geom_point(aes(x = bin,y = copynumbers),data=dfna[dfna$copynumbers>bottom&dfna$copynumbers<cap,], size = 0.1, color = 'black') +
       geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'black', shape = 24) +
@@ -1186,4 +1186,5 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     }
   }
 }
+
 
