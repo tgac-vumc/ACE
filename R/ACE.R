@@ -57,11 +57,11 @@
 # variable, but that might still be handy. singlemodel comes with the
 # awesomeness of manual input: you can restrain the model to the ploidy you
 # expect (default 2, but hey, ploidy 5 happens, right?) and you can tell the
-# program if you think there is a different standard (this should only be
+# program if you think there is a different  (this should only be
 # necessary when the median segment happens to be a subclonal variant; very
 # rare).
 
-# squaremodel: runs the algorithm for each tested ploidy being the standard. If
+# squaremodel: runs the algorithm for each tested ploidy being the . If
 # you feel you are doing too much tinkering with variables using the singlemodel
 # function, then try this! You can choose the range of ploidies it should test;
 # the default being all ploidies between 5 and 1 in 100 decrements of 0.04. Like
@@ -783,7 +783,7 @@ getadjustedsegments <- function(template, QDNAseqobjectsample = FALSE, cellulari
     segmentdata$values <- as.numeric(gsub(".*_", "", segmentdata$values))
   }
   # if(missing(standard) || !is(standard, "numeric")) { standard <- median(rep(segmentdata$values,segmentdata$lengths)) }
-  if(missing(standard) || !is(standard, "numeric")) { standard <- median(template.na$segments) }
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(template.na$segments[!template.na$chr %in% c("X", "Y")]) }
   # adjustedcopynumbers <- ploidy + ((template.na$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   # adjustedsegments <- ploidy + ((template.na$segments-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
   adjustedcopynumbers <- template.na$copynumbers*(ploidy+2/cellularity-2)/standard - gc/cellularity + gc
@@ -1186,5 +1186,6 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     }
   }
 }
+
 
 
