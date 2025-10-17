@@ -24,7 +24,7 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
   gc[template$chr %in% sgc] <- 1
   if(missing(title)) {title <- "Plot"}
   #segmentdata <- rle(as.vector(na.exclude(template$segments)))
-  if(missing(standard) || !is(standard, "numeric")) { standard <- median(template$segments, na.rm = T) }
+  if(missing(standard) || !is(standard, "numeric")) { standard <- median(template$segments[!template$chr %in% c("X", "Y")], na.rm = T) }
   adjustedcopynumbers <- template$copynumbers*(ploidy+2/cellularity-2)/standard - gc/cellularity + gc
   adjustedsegments <- template$segments*(ploidy+2/cellularity-2)/standard - gc/cellularity + gc
   #adjustedcopynumbers <- ploidy + ((template$copynumbers-standard)*(cellularity*(ploidy-2)+2))/(cellularity*standard)
@@ -164,8 +164,8 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
       calledplot <- ggplot2::ggplot() +
         scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom, cap), expand=c(0,0)) +
         scale_x_continuous(name = "chromosome", limits = c(0,tail(binchrend,1)), breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
-        geom_hline(yintercept = seq(0, 4), color = '#333333', size = 0.5) +
-        geom_hline(yintercept = seq(5, cap-1), color = 'lightgray', size = 0.5) +
+        geom_hline(yintercept = seq(0, 4), color = '#333333', linewidth = 0.5) +
+        geom_hline(yintercept = seq(5, cap-1), color = 'lightgray', linewidth = 0.5) +
         geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
         geom_point(aes(x = bin,y = copynumbers),data=dfna[(dfna$copynumbers>bottom&dfna$copynumbers<cap),], size = 0.1, color = 'gray') +
         geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'gray', shape = 24) +
@@ -188,8 +188,8 @@ ACEcall <- function(template, QDNAseqobjectsample=FALSE, cellularity=1, ploidy=2
       calledplot <- ggplot2::ggplot() +
         scale_y_continuous(name = "copies", limits = c(bottom,cap), breaks = seq(bottom, cap), expand=c(0,0)) +
         scale_x_continuous(name = "chromosome", limits = c(firstbin,binchrend[lastchr]), breaks = binchrmdl[seq(firstchr,lastchr)], labels = rlechr$values[seq(firstchr,lastchr)], expand = c(0,0)) +
-        geom_hline(yintercept = seq(0, 4), color = '#333333', size = 0.5) +
-        geom_hline(yintercept = seq(5, cap-1), color = 'lightgray', size = 0.5) +
+        geom_hline(yintercept = seq(0, 4), color = '#333333', linewidth = 0.5) +
+        geom_hline(yintercept = seq(5, cap-1), color = 'lightgray', linewidth = 0.5) +
         geom_vline(xintercept = binchrend[seq(firstchr,lastchr)], color = "#666666", linetype = "dashed") +
         geom_point(aes(x = bin,y = copynumbers),data=dfna[(dfna$copynumbers>bottom&dfna$copynumbers<cap),], size = 0.1, color = 'gray') +
         geom_point(aes(x = bin,y = copynumbers),data=cappedcopynumbers, size = 0.5, color = 'gray', shape = 24) +
@@ -245,14 +245,14 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
   segmentdata2 <- rle(as.vector(paste0(template2na$chr, "_", template2na$segments)))
   if(missing(standard1) || !is(standard1, "numeric")) { 
     # standard1 <- median(rep(segmentdata1$values,segmentdata1$lengths))
-    standard1 <- median(template1na$segments)
+    standard1 <- median(template1na$segments[!template1na$chr %in% c("X", "Y")])
   }
   # adjustedcopynumbers1 <- ploidy1 + ((template1na$copynumbers-standard1)*(cellularity1*(ploidy1-2)+2))/(cellularity1*standard1)
   adjustedcopynumbers1 <- template1$copynumbers*(ploidy1+2/cellularity1-2)/standard1 - gc/cellularity1 + gc
   adjcnna1 <- as.vector(na.exclude(adjustedcopynumbers1))
   if(missing(standard2) || !is(standard2, "numeric")) { 
     # standard2 <- median(rep(segmentdata2$values,segmentdata2$lengths))
-    standard2 <- median(template2na$segments)
+    standard2 <- median(template2na$segments[!template2na$chr %in% c("X", "Y")])
   }
   # adjustedcopynumbers2 <- ploidy2 + ((template2na$copynumbers-standard2)*(cellularity2*(ploidy2-2)+2))/(cellularity2*standard2)
   adjustedcopynumbers2 <- template2$copynumbers*(ploidy2+2/cellularity2-2)/standard2 - gc/cellularity2 + gc
@@ -471,8 +471,8 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
         scale_x_continuous(name = "chromosome", limits = c(0,tail(binchrend,1)), 
                            breaks = binchrmdl, labels = rlechr$values, expand = c(0,0)) +
         geom_bar(aes(x=bin, y = q_value), data=df, fill='green', stat='identity') +
-        geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
-        geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', size = 0.5) +
+        geom_hline(yintercept = seq(0,4), color = '#333333', linewidth = 0.5) +
+        geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', linewidth = 0.5) +
         geom_vline(xintercept = binchrend, color = "#666666", linetype = "dashed") +
         geom_point(aes(x = bin,y = Mean1),data=df, size = 1, color = 'red') +
         geom_point(aes(x = bin,y = Mean2),data=df, size = 1, color = 'blue') +
@@ -503,8 +503,8 @@ twosamplecompare <- function(template1, index1=FALSE, ploidy1=2, cellularity1=1,
                            breaks = binchrmdl[seq(firstchr,lastchr)], 
                            labels = rlechr$values[seq(firstchr,lastchr)], expand = c(0,0)) +
         geom_bar(aes(x=bin, y = q_value), data=df, fill='green', stat='identity') +
-        geom_hline(yintercept = seq(0,4), color = '#333333', size = 0.5) +
-        geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', size = 0.5) +
+        geom_hline(yintercept = seq(0,4), color = '#333333', linewidth = 0.5) +
+        geom_hline(yintercept = seq(5,cap-1), color = 'lightgray', linewidth = 0.5) +
         geom_vline(xintercept = binchrend[seq(firstchr,lastchr)], color = "#666666", linetype = "dashed") +
         geom_point(aes(x = bin,y = Mean1),data=df, size = 1, color = 'red') +
         geom_point(aes(x = bin,y = Mean2),data=df, size = 1, color = 'blue') +
@@ -932,4 +932,5 @@ forcesegmentsontemplate <- function(segmentinput, template, QDNAseqobjectsample 
     }
     template$segments[is.na(template$copynumbers)] <- NA
     return(template)
+
 }
