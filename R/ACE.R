@@ -131,7 +131,7 @@ runACE <- function(inputdir = "./", outputdir, filetype = 'rds', genome = "hg19"
 		  currentdir <- file.path(outputdir,paste0(b,"kbp"))
 		  dir.create(currentdir)
 		  bins <- QDNAseq::getBinAnnotations(binSize = b, genome = genome)
-		  readCounts <- QDNAseq::binReadCounts(bins, path = inputdir)
+		  readCounts <- QDNAseq::binReadCounts(bins, path = inputdir,  chunkSize = 10e6)
 		  if (savereadcounts == TRUE) {
 		    saveRDS(readCounts, file = file.path(outputdir, paste0(b, "kbp-raw.rds")))
 		  }
